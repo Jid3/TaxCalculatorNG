@@ -15,8 +15,13 @@ A Calculator for the new tax laws implemented by the Nigerian government on 1st 
    ```bash
    npm install
    ```
+2. Locate folder
 
-2. Start the app
+   ```bash
+   cd Taxcalculator
+   ```
+
+4. Start the app
 
    ```bash
    npx expo start
