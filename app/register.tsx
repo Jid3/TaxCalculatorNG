@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import useTheme from '../hooks/userTheme';
+import { isValidEmail } from '../utils/validation';
 
 export default function RegisterScreen() {
     const [name, setName] = useState('');
@@ -26,7 +27,7 @@ export default function RegisterScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const { register } = useAuth();
+    const { register, isBiometricAvailable } = useAuth();
     const { colors } = useTheme();
     const router = useRouter();
 
@@ -34,6 +35,11 @@ export default function RegisterScreen() {
         // Validation
         if (!name || !email || !password || !confirmPassword) {
             Alert.alert('Error', 'Please fill in all fields');
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            Alert.alert('Error', 'Please enter a valid email address');
             return;
         }
 
@@ -50,7 +56,26 @@ export default function RegisterScreen() {
         setIsLoading(true);
         try {
             await register(email, password, name);
-            router.replace('/(tabs)');
+
+            if (isBiometricAvailable) {
+                Alert.alert(
+                    'Enable Biometrics',
+                    'Would you like to enable finger print or Face ID login for faster access next time?',
+                    [
+                        {
+                            text: 'Maybe Later',
+                            style: 'cancel',
+                            onPress: () => router.replace('/(tabs)')
+                        },
+                        {
+                            text: 'Enable Now',
+                            onPress: () => router.replace('/settings')
+                        }
+                    ]
+                );
+            } else {
+                router.replace('/(tabs)');
+            }
         } catch (error: any) {
             Alert.alert('Registration Failed', error.message);
         } finally {

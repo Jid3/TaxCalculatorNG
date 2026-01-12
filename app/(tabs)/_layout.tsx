@@ -14,12 +14,12 @@ const TabsLayout = () => {
           backgroundColor: colors.surface,
           borderTopWidth: 1,
           borderTopColor: colors.border,
-          height: 80,
-          paddingBottom: 10,
-          paddingTop: 10,
+          height: 70,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: "bold",
         },
         headerShown: false,
@@ -58,6 +58,19 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <Ionicons
               name='document-text'
+              size={size}
+              color={color}
+            />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="education"
+        options={{
+          title: "Education",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name='book-outline'
               size={size}
               color={color}
             />

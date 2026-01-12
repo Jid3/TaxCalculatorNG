@@ -81,15 +81,20 @@ export default function MyTaxesScreen() {
         },
         header: {
             backgroundColor: colors.surface,
-            padding: 24,
-            paddingTop: 60,
+            padding: 20,
+            paddingTop: 50,
             borderBottomWidth: 1,
             borderBottomColor: colors.border,
         },
         headerTitle: {
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: 'bold',
             color: colors.text,
+            marginBottom: 4,
+        },
+        headerSubtitle: {
+            fontSize: 13,
+            color: colors.textMuted,
         },
         listContent: {
             padding: 16,
@@ -159,6 +164,7 @@ export default function MyTaxesScreen() {
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>My Taxes</Text>
+                    <Text style={styles.headerSubtitle}>This is a list of all your saved taxes</Text>
                 </View>
                 <View style={styles.emptyContainer}>
                     <Text style={styles.emptyText}>Please login to view your history</Text>
@@ -179,6 +185,7 @@ export default function MyTaxesScreen() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>My Taxes</Text>
+                <Text style={styles.headerSubtitle}>This is a list of all your saved taxes</Text>
             </View>
 
             <FlatList

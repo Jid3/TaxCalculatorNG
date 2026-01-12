@@ -10,11 +10,15 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const navigateToCalculator = (type: 'monthly' | 'annual') => {
+  const navigateToCalculator = (type: 'monthly' | 'annual' | 'weekly') => {
     router.push({
       pathname: '/(tabs)/calculator',
       params: { incomeType: type, reset: 'true' }
     });
+  };
+
+  const navigateToEducation = () => {
+    router.push('/(tabs)/education');
   };
 
   const styles = StyleSheet.create({
@@ -24,19 +28,19 @@ export default function HomeScreen() {
     },
     header: {
       backgroundColor: colors.surface,
-      padding: 24,
-      paddingTop: 60,
+      padding: 20,
+      paddingTop: 50,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
     greeting: {
-      fontSize: 28,
+      fontSize: 24,
       fontWeight: 'bold',
       color: colors.text,
       marginBottom: 4,
     },
     subtitle: {
-      fontSize: 14,
+      fontSize: 13,
       color: colors.textMuted,
     },
     content: {
@@ -126,6 +130,34 @@ export default function HomeScreen() {
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>Calculate Annual Tax</Text>
             <Text style={styles.cardDescription}>Compute taxes on your yearly income</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => navigateToCalculator('weekly')}
+        >
+          <View style={[styles.iconContainer, { backgroundColor: '#6366f120' }]}>
+            <Ionicons name="time-outline" size={24} color="#6366f1" />
+          </View>
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Calculate Weekly Tax</Text>
+            <Text style={styles.cardDescription}>Compute taxes on your weekly earnings</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.card}
+          onPress={navigateToEducation}
+        >
+          <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
+            <Ionicons name="book-outline" size={24} color={colors.primary} />
+          </View>
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Education & Guide</Text>
+            <Text style={styles.cardDescription}>Learn about the 2026 Nigeria Tax Act</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
         </TouchableOpacity>

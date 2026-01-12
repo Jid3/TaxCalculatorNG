@@ -269,6 +269,20 @@ export function annualToMonthly(annualIncome: number): number {
 
 /**
  * ============================================================================
+ * CONVERT WEEKLY TO ANNUAL INCOME
+ * ============================================================================
+ * 
+ * Simple helper to convert weekly income to annual.
+ * 
+ * @param weeklyIncome - Weekly income amount
+ * @returns Annual income (weekly × 52)
+ */
+export function weeklyToAnnual(weeklyIncome: number): number {
+    return weeklyIncome * 52;
+}
+
+/**
+ * ============================================================================
  * CALCULATE TAX FROM MONTHLY INCOME
  * ============================================================================
  * 
@@ -294,6 +308,39 @@ export function calculateTaxFromMonthly(
             ? monthlyToAnnual(monthlyReliefs.lifeInsurance)
             : 0,
         rentPaid: monthlyReliefs.rentPaid || 0, // Rent is already annual
+    };
+
+    // Calculate annual tax
+    return calculateTax(annualIncome, annualReliefs);
+}
+
+/**
+ * ============================================================================
+ * CALCULATE TAX FROM WEEKLY INCOME
+ * ============================================================================
+ * 
+ * Convenience function to calculate tax when you have weekly figures.
+ * Converts weekly to annual, calculates tax, then shows weekly breakdown.
+ * 
+ * @param weeklyIncome - Weekly gross income
+ * @param weeklyReliefs - Weekly relief amounts
+ * @returns Tax breakdown with weekly and annual figures
+ */
+export function calculateTaxFromWeekly(
+    weeklyIncome: number,
+    weeklyReliefs: TaxReliefs = {}
+): TaxBreakdown {
+    // Convert weekly to annual (using 52 weeks)
+    const annualIncome = weeklyToAnnual(weeklyIncome);
+
+    const annualReliefs: TaxReliefs = {
+        pension: weeklyReliefs.pension ? weeklyToAnnual(weeklyReliefs.pension) : 0,
+        nhf: weeklyReliefs.nhf ? weeklyToAnnual(weeklyReliefs.nhf) : 0,
+        nhis: weeklyReliefs.nhis ? weeklyToAnnual(weeklyReliefs.nhis) : 0,
+        lifeInsurance: weeklyReliefs.lifeInsurance
+            ? weeklyToAnnual(weeklyReliefs.lifeInsurance)
+            : 0,
+        rentPaid: weeklyReliefs.rentPaid || 0, // Rent is already annual
     };
 
     // Calculate annual tax

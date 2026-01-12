@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
+import { isValidEmail } from '@/utils/validation';
 
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -41,6 +42,7 @@ export default function SettingsScreen() {
   const [editPassword, setEditPassword] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const generateUploadUrl = useMutation(api.users.generateUploadUrl);
   const updateProfile = useMutation(api.users.updateProfile);
@@ -51,6 +53,7 @@ export default function SettingsScreen() {
       setEditName(displayUser.name || '');
       setEditEmail(displayUser.email || '');
       setEditPassword('');
+      setShowPassword(false);
       setSelectedImage(displayUser.imageUrl || null);
       setIsEditModalVisible(true);
     }
@@ -116,6 +119,10 @@ export default function SettingsScreen() {
     setIsSaving(true);
     try {
       // 1. Validation
+      if (!editEmail || !isValidEmail(editEmail)) {
+        throw new Error("Please enter a valid email address");
+      }
+
       if (editPassword.length > 0 && editPassword.length < 6) {
         throw new Error("Password must be at least 6 characters");
       }
@@ -197,8 +204,8 @@ export default function SettingsScreen() {
     },
     header: {
       backgroundColor: colors.surface,
-      padding: 24,
-      paddingTop: 60,
+      padding: 20,
+      paddingTop: 50,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
       flexDirection: 'row',
@@ -206,7 +213,7 @@ export default function SettingsScreen() {
       alignItems: 'center',
     },
     headerTitle: {
-      fontSize: 28,
+      fontSize: 24,
       fontWeight: 'bold',
       color: colors.text,
     },
@@ -395,6 +402,25 @@ export default function SettingsScreen() {
       padding: 16,
       fontSize: 16,
       color: colors.text,
+      flex: 1,
+    },
+    passwordInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    passwordInput: {
+      flex: 1,
+      padding: 16,
+      fontSize: 16,
+      color: colors.text,
+    },
+    eyeIcon: {
+      padding: 16,
     },
     saveButton: {
       backgroundColor: colors.primary,
@@ -571,15 +597,27 @@ export default function SettingsScreen() {
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>New Password (Optional)</Text>
-              <TextInput
-                style={styles.input}
-                value={editPassword}
-                onChangeText={setEditPassword}
-                placeholder="Enter new password"
-                placeholderTextColor={colors.textMuted}
-                secureTextEntry
-                editable={!isSaving}
-              />
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  value={editPassword}
+                  onChangeText={setEditPassword}
+                  placeholder="Enter new password"
+                  placeholderTextColor={colors.textMuted}
+                  secureTextEntry={!showPassword}
+                  editable={!isSaving}
+                />
+                <TouchableOpacity
+                  style={styles.eyeIcon}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={22}
+                    color={colors.textMuted}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity

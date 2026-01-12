@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import { AppState, AppStateStatus } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useMutation, useQuery } from 'convex/react';
@@ -49,6 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
+    const appState = useRef(AppState.currentState);
+    const backgroundTimestamp = useRef<number | null>(null);
 
     const loginMutation = useMutation(api.users.login);
     const registerMutation = useMutation(api.users.register);
@@ -59,6 +62,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         checkBiometricAvailability();
         loadStoredUser();
     }, []);
+
+    // Session timeout logic
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+            if (
+                appState.current.match(/inactive|background/) &&
+                nextAppState === 'active'
+            ) {
+                // App has come to the foreground!
+                if (backgroundTimestamp.current && user) {
+                    const elapsed = Date.now() - backgroundTimestamp.current;
+                    // 1 minute if biometrics enabled, 2 minutes grace if not
+                    const timeoutLimit = user.biometricEnabled ? 60 * 1000 : 120 * 1000;
+
+                    if (elapsed > timeoutLimit) {
+                        console.log(`Session timed out (${timeoutLimit / 1000}s). Redirecting to login.`);
+                        setUser(null);
+                        backgroundTimestamp.current = null;
+                    }
+                }
+            }
+
+            if (nextAppState.match(/inactive|background/)) {
+                backgroundTimestamp.current = Date.now();
+            }
+
+            appState.current = nextAppState;
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [user]);
 
     const checkBiometricAvailability = async () => {
         const compatible = await LocalAuthentication.hasHardwareAsync();

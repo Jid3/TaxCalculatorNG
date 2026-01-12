@@ -52,7 +52,7 @@ export interface CalculationHistory {
     grossIncome: number;
     totalTax: number;
     netIncome: number;
-    incomeType: 'monthly' | 'annual';
+    incomeType: 'monthly' | 'annual' | 'weekly';
 }
 
-export type IncomeType = 'monthly' | 'annual';
+export type IncomeType = 'monthly' | 'annual' | 'weekly';
