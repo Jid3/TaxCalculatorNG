@@ -25,23 +25,14 @@ import {
     parseNumber,
 } from '@/utils/taxCalculations';
 import { TaxBreakdown as TaxBreakdownType, TaxReliefs } from '@/types/taxTypes';
-import { useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
 import { useTaxHistory } from '@/hooks/useTaxHistory';
 
 export default function CalculatorScreen() {
     const { colors } = useTheme();
     const { user } = useAuth();
     const router = useRouter();
-    const saveCalculation = useMutation(api.calculations.saveCalculation);
-    const { addOptimisticCalculation } = useTaxHistory();
+    const { addCalculation } = useTaxHistory();
 
-    // Redirect to login if not authenticated
-    useEffect(() => {
-        if (!user) {
-            router.replace('/login');
-        }
-    }, [user]);
 
     // Income type toggle
     const [incomeType, setIncomeType] = useState<'monthly' | 'annual' | 'weekly'>('monthly');
@@ -109,7 +100,6 @@ export default function CalculatorScreen() {
         }
     }, [paramEditMode, calculationId, params.reset, params.incomeType]);
 
-    const updateCalculation = useMutation(api.calculations.updateCalculation);
 
     const handleCalculate = () => {
         const incomeValue = parseNumber(income);
@@ -145,7 +135,6 @@ export default function CalculatorScreen() {
         if (!user || !taxBreakdown) return;
 
         try {
-            // 1. OPTIMISTIC UPDATE
             const optimisticData = {
                 grossIncome: taxBreakdown.grossIncome,
                 incomeType,
@@ -157,31 +146,13 @@ export default function CalculatorScreen() {
                 taxableIncome: taxBreakdown.taxableIncome,
                 totalTax: taxBreakdown.totalTax,
                 netIncome: taxBreakdown.netIncome,
+                ...(editMode ? { _id: editingId } : {})
             };
 
-            // If editing, use the existing ID, otherwise let addOptimisticCalculation generate a temp one
-            addOptimisticCalculation(editMode ? { ...optimisticData, _id: editingId } : optimisticData);
+            // Save locally
+            addCalculation(optimisticData);
 
             Alert.alert('Success', editMode ? 'Calculation updated successfully' : 'Calculation saved to My Taxes');
-
-            // 2. BACKGROUND SYNC
-            (async () => {
-                try {
-                    if (editMode && editingId) {
-                        await updateCalculation({
-                            calculationId: editingId,
-                            ...optimisticData
-                        });
-                    } else {
-                        await saveCalculation({
-                            userId: user.userId,
-                            ...optimisticData
-                        });
-                    }
-                } catch (error: any) {
-                    console.error("Background tax save failed:", error);
-                }
-            })();
 
         } catch (error: any) {
             Alert.alert('Error', error.message || 'Failed to save calculation');
@@ -432,9 +403,6 @@ export default function CalculatorScreen() {
         },
     });
 
-    if (!user) {
-        return null;
-    }
 
     return (
         <View style={styles.container}>
@@ -692,7 +660,10 @@ export default function CalculatorScreen() {
                             )}
                             {taxBreakdown.rentRelief > 0 && (
                                 <View style={styles.breakdownRow}>
-                                    <Text style={styles.breakdownLabel}>Rent Relief</Text>
+                                    <View>
+                                        <Text style={styles.breakdownLabel}>Rent Relief</Text>
+                                        <Text style={{ fontSize: 10, color: colors.textMuted }}>(20% of annual rent)</Text>
+                                    </View>
                                     <Text style={styles.breakdownValue}>
                                         {formatCurrency(taxBreakdown.rentRelief)}
                                     </Text>

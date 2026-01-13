@@ -1,13 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
 import { formatCurrency } from '@/utils/taxCalculations';
 import { useRouter } from 'expo-router';
-import { Id } from '../../convex/_generated/dataModel';
 
 import { useTaxHistory } from '@/hooks/useTaxHistory';
 
@@ -16,10 +13,9 @@ export default function MyTaxesScreen() {
     const { user } = useAuth();
     const router = useRouter();
 
-    const { data: calculations, isLoading } = useTaxHistory();
-    const deleteCalculation = useMutation(api.calculations.deleteCalculation);
+    const { data: calculations, isLoading, refreshing, refresh, deleteCalculation } = useTaxHistory();
 
-    const handleDelete = (id: Id<"calculations">) => {
+    const handleDelete = (id: string) => {
         Alert.alert(
             "Delete Calculation",
             "Are you sure you want to delete this saved calculation?",
@@ -30,7 +26,7 @@ export default function MyTaxesScreen() {
                     style: "destructive",
                     onPress: async () => {
                         try {
-                            await deleteCalculation({ calculationId: id });
+                            await deleteCalculation(id);
                         } catch (error) {
                             Alert.alert("Error", "Failed to delete calculation");
                         }
@@ -39,8 +35,6 @@ export default function MyTaxesScreen() {
             ]
         );
     };
-
-
 
     const renderItem = ({ item }: { item: any }) => (
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -159,20 +153,6 @@ export default function MyTaxesScreen() {
         },
     });
 
-    if (!user) {
-        return (
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>My Taxes</Text>
-                    <Text style={styles.headerSubtitle}>This is a list of all your saved taxes</Text>
-                </View>
-                <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>Please login to view your history</Text>
-                </View>
-            </View>
-        );
-    }
-
     if (isLoading) {
         return (
             <View style={[styles.container, { justifyContent: 'center' }]}>
@@ -193,6 +173,14 @@ export default function MyTaxesScreen() {
                 renderItem={renderItem}
                 keyExtractor={(item) => item._id}
                 contentContainerStyle={styles.listContent}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={refresh}
+                        tintColor={colors.primary}
+                        colors={[colors.primary]}
+                    />
+                }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Ionicons name="document-text-outline" size={64} color={colors.textMuted} />

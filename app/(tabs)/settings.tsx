@@ -1,199 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import * as ImageManipulator from 'expo-image-manipulator';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Switch,
   Alert,
   Modal,
   TextInput,
-  Image,
-  ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
 import { useAuth } from '@/contexts/AuthContext';
-import * as ImagePicker from 'expo-image-picker';
-import { isValidEmail } from '@/utils/validation';
-
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { useSecurity } from '@/contexts/SecurityContext';
 
 export default function SettingsScreen() {
   const { colors, isDarkMode, toggleDarkMode } = useTheme();
-  const { user, logout, isBiometricAvailable, enableBiometrics, disableBiometrics, updateLocalUser } = useAuth();
+  const { user } = useAuth();
+  const {
+    hasPassword,
+    isBiometricEnabled,
+    isBiometricAvailable,
+    setPassword,
+    setBiometricEnabled,
+    removeSecurity
+  } = useSecurity();
   const router = useRouter();
-  const [isTogglingBiometric, setIsTogglingBiometric] = useState(false);
 
-  // Fetch fresh user data from backend
-  const convexUser = useQuery(api.users.getUser, user ? { userId: user.userId } : "skip");
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+  const [newPIN, setNewPIN] = useState('');
+  const [confirmPIN, setConfirmPIN] = useState('');
+  const [showPIN, setShowPIN] = useState(false);
 
-  // Use convex data if available, otherwise fall back to local auth user
-  const displayUser = convexUser || user;
+  // For guest mode, displayUser is just the local user
+  const displayUser = user || { name: 'Guest User', email: 'guest@example.com', imageUrl: null, userId: 'guest', biometricEnabled: false };
 
-  // Edit Profile State
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [editPassword, setEditPassword] = useState('');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const generateUploadUrl = useMutation(api.users.generateUploadUrl);
-  const updateProfile = useMutation(api.users.updateProfile);
-  const changePassword = useMutation(api.users.changePassword);
-
-  const openEditModal = () => {
-    if (displayUser) {
-      setEditName(displayUser.name || '');
-      setEditEmail(displayUser.email || '');
-      setEditPassword('');
-      setShowPassword(false);
-      setSelectedImage(displayUser.imageUrl || null);
-      setIsEditModalVisible(true);
+  const handleLockToggle = async (value: boolean) => {
+    if (value) {
+      setIsPasswordModalVisible(true);
+    } else {
+      Alert.alert(
+        'Disable App Lock',
+        'Are you sure you want to disable password protection?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Disable',
+            style: 'destructive',
+            onPress: async () => await removeSecurity()
+          }
+        ]
+      );
     }
   };
 
-  const handleBiometricToggle = async (value: boolean) => {
-    setIsTogglingBiometric(true);
-    try {
-      if (value) {
-        await enableBiometrics();
-        Alert.alert('Success', 'Biometric authentication enabled');
-      } else {
-        await disableBiometrics();
-        Alert.alert('Success', 'Biometric authentication disabled');
-      }
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
-    } finally {
-      setIsTogglingBiometric(false);
+  const handleSavePIN = async () => {
+    if (newPIN.length !== 6 || !/^\d+$/.test(newPIN)) {
+      Alert.alert('Error', 'PIN must be exactly 6 digits');
+      return;
     }
-  };
-
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/login');
-          },
-        },
-      ]
-    );
-  };
-
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Sorry, we need camera roll permissions to make this work!');
+    if (newPIN !== confirmPIN) {
+      Alert.alert('Error', 'PINs do not match');
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    if (!user) return;
-    setIsSaving(true);
     try {
-      // 1. Validation
-      if (!editEmail || !isValidEmail(editEmail)) {
-        throw new Error("Please enter a valid email address");
-      }
-
-      if (editPassword.length > 0 && editPassword.length < 6) {
-        throw new Error("Password must be at least 6 characters");
-      }
-
-      // 2. OPTIMISTIC UPDATE
-      const optimisticUpdates = {
-        name: editName,
-        email: editEmail,
-        imageUrl: selectedImage
-      };
-
-      setIsEditModalVisible(false);
-      Alert.alert("Success", "Profile updated successfully!");
-
-      updateLocalUser(optimisticUpdates).catch(e => console.error("Local update failed", e));
-
-      // 3. BACKGROUND SYNC
-      (async () => {
-        try {
-          const promises = [];
-
-          if (editPassword.length > 0) {
-            promises.push(changePassword({
-              userId: user.userId,
-              newPassword: editPassword,
-            }));
-          }
-
-          const profileUpdatePromise = (async () => {
-            let profileImageId = undefined;
-
-            if (selectedImage && (selectedImage.startsWith('file:') || selectedImage.startsWith('content:'))) {
-              const manipulatedImage = await ImageManipulator.manipulateAsync(
-                selectedImage,
-                [{ resize: { width: 800 } }],
-                { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-              );
-
-              const postUrl = await generateUploadUrl();
-              const response = await fetch(manipulatedImage.uri);
-              const blob = await response.blob();
-              const result = await fetch(postUrl, {
-                method: "POST",
-                headers: { "Content-Type": blob.type },
-                body: blob,
-              });
-              const { storageId } = await result.json();
-              profileImageId = storageId;
-            }
-
-            await updateProfile({
-              userId: user.userId,
-              name: editName,
-              email: editEmail,
-              profileImageId: profileImageId,
-            });
-          })();
-
-          promises.push(profileUpdatePromise);
-          await Promise.all(promises);
-
-        } catch (error) {
-          console.error("Background sync failed:", error);
-        } finally {
-          setIsSaving(false);
-        }
-      })();
-
-    } catch (error: any) {
-      setIsSaving(false);
-      Alert.alert("Error", error.message || "Failed to update profile");
+      await setPassword(newPIN);
+      setIsPasswordModalVisible(false);
+      setNewPIN('');
+      setConfirmPIN('');
+      Alert.alert('Success', 'Security settings updated');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save PIN');
     }
   };
 
@@ -209,16 +89,13 @@ export default function SettingsScreen() {
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'center',
       alignItems: 'center',
     },
     headerTitle: {
       fontSize: 24,
       fontWeight: 'bold',
       color: colors.text,
-    },
-    editButton: {
-      padding: 8,
     },
     content: {
       flex: 1,
@@ -273,51 +150,6 @@ export default function SettingsScreen() {
       fontSize: 13,
       color: colors.textMuted,
     },
-    profileCard: {
-      backgroundColor: colors.surface,
-      margin: 16,
-      borderRadius: 16,
-      padding: 20,
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    profileIcon: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 16,
-      overflow: 'hidden',
-    },
-    profileImage: {
-      width: '100%',
-      height: '100%',
-    },
-    profileName: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: colors.text,
-      marginBottom: 4,
-    },
-    profileEmail: {
-      fontSize: 14,
-      color: colors.textMuted,
-    },
-    logoutButton: {
-      backgroundColor: colors.danger,
-      margin: 16,
-      borderRadius: 12,
-      padding: 16,
-      alignItems: 'center',
-    },
-    logoutButtonText: {
-      color: '#ffffff',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
     aboutCard: {
       backgroundColor: colors.surface,
       borderTopWidth: 1,
@@ -337,132 +169,63 @@ export default function SettingsScreen() {
       textAlign: 'center',
       marginTop: 8,
     },
-    // Modal Styles
-    modalContainer: {
+    modalOverlay: {
       flex: 1,
-      backgroundColor: colors.bg,
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 20,
-      paddingTop: 60,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    modalTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: colors.text,
-    },
-    modalCloseText: {
-      fontSize: 16,
-      color: colors.primary,
-    },
-    modalContent: {
-      padding: 20,
-    },
-    imagePicker: {
-      alignItems: 'center',
-      marginBottom: 24,
-    },
-    imagePreview: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: colors.surface,
       justifyContent: 'center',
       alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginBottom: 8,
-      overflow: 'hidden',
+      padding: 24,
     },
-    changePhotoText: {
-      color: colors.primary,
-      fontSize: 14,
-      fontWeight: '600',
+    modalContent: {
+      width: '100%',
+      borderRadius: 20,
+      padding: 24,
+      elevation: 5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
     },
-    inputGroup: {
-      marginBottom: 16,
-    },
-    label: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
-      marginBottom: 8,
-    },
-    input: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      padding: 16,
-      fontSize: 16,
-      color: colors.text,
-      flex: 1,
-    },
-    passwordInputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      overflow: 'hidden',
-    },
-    passwordInput: {
-      flex: 1,
-      padding: 16,
-      fontSize: 16,
-      color: colors.text,
-    },
-    eyeIcon: {
-      padding: 16,
-    },
-    saveButton: {
-      backgroundColor: colors.primary,
-      borderRadius: 12,
-      padding: 16,
-      alignItems: 'center',
-      marginTop: 24,
-    },
-    saveButtonText: {
-      color: '#ffffff',
-      fontSize: 16,
+    modalTitle: {
+      fontSize: 20,
       fontWeight: 'bold',
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    inputContainer: {
+      marginBottom: 20,
+    },
+    modalInput: {
+      height: 56,
+      borderRadius: 12,
+      borderWidth: 1,
+      paddingHorizontal: 16,
+      marginBottom: 12,
+      fontSize: 16,
+    },
+    showPasswordButton: {
+      alignSelf: 'flex-end',
+      padding: 4,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    modalButton: {
+      flex: 0.48,
+      height: 48,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Settings</Text>
-        <TouchableOpacity onPress={openEditModal} style={styles.editButton}>
-          <Text style={{ color: colors.primary, fontWeight: 'bold' }}>Edit Profile</Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Profile Section */}
-        <View style={styles.profileCard}>
-          <View style={styles.profileIcon}>
-            {displayUser?.imageUrl ? (
-              <Image source={{ uri: displayUser.imageUrl }} style={styles.profileImage} />
-            ) : (
-              <Ionicons name="person" size={40} color="#ffffff" />
-            )}
-          </View>
-          <Text style={styles.profileName}>{displayUser?.name || 'User'}</Text>
-          <Text style={styles.profileEmail}>{displayUser?.email}</Text>
-        </View>
-
         {/* Appearance Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appearance</Text>
@@ -495,30 +258,64 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Security</Text>
           <View style={styles.settingCard}>
-            <View style={[styles.settingItem, styles.settingItemLast]}>
+            {/* App Lock Toggle */}
+            <View style={styles.settingItem}>
               <View style={styles.settingIcon}>
-                <Ionicons name="finger-print" size={20} color={colors.primary} />
+                <Ionicons name="lock-closed" size={20} color={colors.primary} />
               </View>
               <View style={styles.settingContent}>
-                <Text style={styles.settingTitle}>Biometric Login</Text>
+                <Text style={styles.settingTitle}>Enable App Lock</Text>
                 <Text style={styles.settingDescription}>
-                  {isBiometricAvailable
-                    ? displayUser?.biometricEnabled
-                      ? 'Enabled - Use fingerprint/Face ID to login'
-                      : 'Enable fingerprint/Face ID login'
-                    : 'Not available on this device'}
+                  Require a 6-digit PIN to open the app
                 </Text>
               </View>
-              {isBiometricAvailable && (
+              <Switch
+                value={hasPassword}
+                onValueChange={handleLockToggle}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                thumbColor="#ffffff"
+              />
+            </View>
+
+            {/* Change Password */}
+            {hasPassword && (
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={() => setIsPasswordModalVisible(true)}
+              >
+                <View style={styles.settingIcon}>
+                  <Ionicons name="key" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingTitle}>Change PIN</Text>
+                  <Text style={styles.settingDescription}>
+                    Update your 6-digit app lock PIN
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+            )}
+
+            {/* Biometric Toggle */}
+            {isBiometricAvailable && hasPassword && (
+              <View style={[styles.settingItem, styles.settingItemLast]}>
+                <View style={styles.settingIcon}>
+                  <Ionicons name="finger-print" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingTitle}>Biometric Unlock</Text>
+                  <Text style={styles.settingDescription}>
+                    Use Face ID or Fingerprint
+                  </Text>
+                </View>
                 <Switch
-                  value={displayUser?.biometricEnabled || false}
-                  onValueChange={handleBiometricToggle}
-                  disabled={isTogglingBiometric}
+                  value={isBiometricEnabled}
+                  onValueChange={setBiometricEnabled}
                   trackColor={{ false: colors.border, true: colors.primary }}
                   thumbColor="#ffffff"
                 />
-              )}
-            </View>
+              </View>
+            )}
           </View>
         </View>
 
@@ -535,103 +332,68 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
-
         <View style={{ height: 40 }} />
       </ScrollView>
 
-      {/* Edit Profile Modal */}
+      {/* Password Modal */}
       <Modal
-        visible={isEditModalVisible}
-        animationType="slide"
-        onRequestClose={() => setIsEditModalVisible(false)}
+        visible={isPasswordModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsPasswordModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Edit Profile</Text>
-            <TouchableOpacity onPress={() => setIsEditModalVisible(false)} disabled={isSaving}>
-              <Text style={styles.modalCloseText}>Cancel</Text>
-            </TouchableOpacity>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {hasPassword ? 'Change PIN' : 'Set 6-digit PIN'}
+            </Text>
+
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.modalInput, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                placeholder="New 6-digit PIN"
+                placeholderTextColor={colors.textMuted}
+                secureTextEntry={!showPIN}
+                keyboardType="numeric"
+                maxLength={6}
+                value={newPIN}
+                onChangeText={setNewPIN}
+              />
+              <TextInput
+                style={[styles.modalInput, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                placeholder="Confirm 6-digit PIN"
+                placeholderTextColor={colors.textMuted}
+                secureTextEntry={!showPIN}
+                keyboardType="numeric"
+                maxLength={6}
+                value={confirmPIN}
+                onChangeText={setConfirmPIN}
+              />
+              <TouchableOpacity
+                style={styles.showPasswordButton}
+                onPress={() => setShowPIN(!showPIN)}
+              >
+                <Text style={{ color: colors.primary }}>
+                  {showPIN ? 'Hide' : 'Show'} PIN
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: colors.bg }]}
+                onPress={() => setIsPasswordModalVisible(false)}
+              >
+                <Text style={{ color: colors.text }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: colors.primary }]}
+                onPress={handleSavePIN}
+              >
+                <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>Save</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-          <ScrollView style={styles.modalContent}>
-            <TouchableOpacity style={styles.imagePicker} onPress={pickImage} disabled={isSaving}>
-              <View style={styles.imagePreview}>
-                {selectedImage ? (
-                  <Image source={{ uri: selectedImage }} style={styles.profileImage} />
-                ) : (
-                  <Ionicons name="person" size={40} color={colors.textMuted} />
-                )}
-              </View>
-              <Text style={styles.changePhotoText}>Change Photo</Text>
-            </TouchableOpacity>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                value={editName}
-                onChangeText={setEditName}
-                placeholder="Enter your name"
-                placeholderTextColor={colors.textMuted}
-                editable={!isSaving}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email Address</Text>
-              <TextInput
-                style={styles.input}
-                value={editEmail}
-                onChangeText={setEditEmail}
-                placeholder="Enter email"
-                placeholderTextColor={colors.textMuted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={!isSaving}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>New Password (Optional)</Text>
-              <View style={styles.passwordInputContainer}>
-                <TextInput
-                  style={styles.passwordInput}
-                  value={editPassword}
-                  onChangeText={setEditPassword}
-                  placeholder="Enter new password"
-                  placeholderTextColor={colors.textMuted}
-                  secureTextEntry={!showPassword}
-                  editable={!isSaving}
-                />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Ionicons
-                    name={showPassword ? "eye-off" : "eye"}
-                    size={22}
-                    color={colors.textMuted}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.saveButton, { opacity: isSaving ? 0.7 : 1 }]}
-              onPress={handleSaveProfile}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.saveButtonText}>Save Changes</Text>
-              )}
-            </TouchableOpacity>
-          </ScrollView>
         </View>
       </Modal>
     </View>

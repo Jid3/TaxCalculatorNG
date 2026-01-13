@@ -92,14 +92,11 @@ export default function HomeScreen() {
     },
   });
 
-  if (!user) {
-    return null; // Or a loading state/redirect
-  }
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hello, {user.name.split(' ')[0]}! 👋</Text>
+        <Text style={styles.greeting}>Hello, {user?.name.split(' ')[0] || 'Guest'}! 👋</Text>
         <Text style={styles.subtitle}>Welcome to your Tax Assistant</Text>
       </View>
 
