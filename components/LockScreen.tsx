@@ -28,7 +28,7 @@ export default function LockScreen() {
     const handleUnlock = async () => {
         const success = await unlock(password);
         if (!success) {
-            Alert.alert('Error', 'Incorrect password');
+            Alert.alert('Error', 'Incorrect PIN');
             setPassword('');
         }
     };

@@ -3,27 +3,19 @@ import { AppState, AppStateStatus } from 'react-native';
 
 /**
  * Authentication Context for Nigerian Tax Calculator
- * (Simplified for Guest Mode - Convex removed)
+ * (Simplified for Guest Mode)
  */
 
 export interface User {
     userId: string;
     email: string;
     name: string;
-    biometricEnabled: boolean;
     imageUrl?: string | null;
 }
 
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
-    login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string, name: string) => Promise<void>;
-    logout: () => Promise<void>;
-    loginWithBiometrics: () => Promise<void>;
-    isBiometricAvailable: boolean;
-    enableBiometrics: () => Promise<void>;
-    disableBiometrics: () => Promise<void>;
     updateLocalUser: (updates: Partial<User>) => Promise<void>;
 }
 
@@ -35,49 +27,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userId: "guest_user_id",
         email: "guest@example.com",
         name: "Guest User",
-        biometricEnabled: false,
     });
     const [isLoading, setIsLoading] = useState(false);
-    const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
-    const appState = useRef(AppState.currentState);
-    const backgroundTimestamp = useRef<number | null>(null);
 
-    // No need to check biometrics or load stored user
     useEffect(() => {
         setIsLoading(false);
     }, []);
-
-    // Session timeout logic
-    useEffect(() => {
-        const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
-            if (
-                appState.current.match(/inactive|background/) &&
-                nextAppState === 'active'
-            ) {
-                // App has come to the foreground!
-                if (backgroundTimestamp.current && user) {
-                    const elapsed = Date.now() - backgroundTimestamp.current;
-                    // 1 minute if biometrics enabled, 2 minutes grace if not
-                    const timeoutLimit = user.biometricEnabled ? 60 * 1000 : 120 * 1000;
-
-                    if (elapsed > timeoutLimit) {
-                        console.log(`Session timed out (${timeoutLimit / 1000}s).`);
-                        backgroundTimestamp.current = null;
-                    }
-                }
-            }
-
-            if (nextAppState.match(/inactive|background/)) {
-                backgroundTimestamp.current = Date.now();
-            }
-
-            appState.current = nextAppState;
-        });
-
-        return () => {
-            subscription.remove();
-        };
-    }, [user]);
 
     const updateLocalUser = async (updates: Partial<User>) => {
         if (!user) return;
@@ -89,13 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             value={{
                 user,
                 isLoading,
-                login: async () => { },
-                register: async () => { },
-                logout: async () => { },
-                loginWithBiometrics: async () => { },
-                isBiometricAvailable,
-                enableBiometrics: async () => { },
-                disableBiometrics: async () => { },
                 updateLocalUser,
             }}
         >

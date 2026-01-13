@@ -35,7 +35,7 @@ export default function SettingsScreen() {
   const [showPIN, setShowPIN] = useState(false);
 
   // For guest mode, displayUser is just the local user
-  const displayUser = user || { name: 'Guest User', email: 'guest@example.com', imageUrl: null, userId: 'guest', biometricEnabled: false };
+  const displayUser = user || { name: 'Guest User', email: 'guest@example.com', imageUrl: null, userId: 'guest' };
 
   const handleLockToggle = async (value: boolean) => {
     if (value) {
@@ -43,7 +43,7 @@ export default function SettingsScreen() {
     } else {
       Alert.alert(
         'Disable App Lock',
-        'Are you sure you want to disable password protection?',
+        'Are you sure you want to disable PIN protection?',
         [
           { text: 'Cancel', style: 'cancel' },
           {

@@ -92,7 +92,7 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
         try {
             const result = await LocalAuthentication.authenticateAsync({
                 promptMessage: 'Unlock Tax Calculator',
-                fallbackLabel: 'Use Password',
+                fallbackLabel: 'Use PIN',
             });
 
             if (result.success) {

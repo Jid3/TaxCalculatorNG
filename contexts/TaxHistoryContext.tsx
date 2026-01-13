@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TaxBreakdown, IncomeType, CalculationHistoryItem } from '@/types/taxTypes';
 
 const CACHE_KEY = 'tax_history_cache';
 
 interface TaxHistoryContextType {
-    data: any[] | null;
+    data: CalculationHistoryItem[] | null;
     isLoading: boolean;
     refreshing: boolean;
     refresh: () => Promise<void>;
@@ -15,7 +16,7 @@ interface TaxHistoryContextType {
 const TaxHistoryContext = createContext<TaxHistoryContextType | undefined>(undefined);
 
 export function TaxHistoryProvider({ children }: { children: ReactNode }) {
-    const [data, setData] = useState<any[] | null>(null);
+    const [data, setData] = useState<CalculationHistoryItem[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -46,13 +47,23 @@ export function TaxHistoryProvider({ children }: { children: ReactNode }) {
     };
 
     const addCalculation = async (newCalc: any) => {
-        const entry = {
-            ...newCalc,
-            _id: Date.now().toString(),
-            createdAt: Date.now(),
-        };
+        let updatedHistory;
 
-        const updatedHistory = [entry, ...(data || [])];
+        if (newCalc._id) {
+            // Update existing entry
+            updatedHistory = (data || []).map(item =>
+                item._id === newCalc._id ? { ...item, ...newCalc } : item
+            );
+        } else {
+            // Create new entry
+            const entry = {
+                ...newCalc,
+                _id: Date.now().toString(),
+                createdAt: Date.now(),
+            };
+            updatedHistory = [entry, ...(data || [])];
+        }
+
         setData(updatedHistory); // Optimistic update
 
         try {

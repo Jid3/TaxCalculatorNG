@@ -7,6 +7,7 @@ import { formatCurrency } from '@/utils/taxCalculations';
 import { useRouter } from 'expo-router';
 
 import { useTaxHistory } from '@/hooks/useTaxHistory';
+import { CalculationHistoryItem } from '@/types/taxTypes';
 
 export default function MyTaxesScreen() {
     const { colors } = useTheme();
@@ -36,7 +37,7 @@ export default function MyTaxesScreen() {
         );
     };
 
-    const renderItem = ({ item }: { item: any }) => (
+    const renderItem = ({ item }: { item: CalculationHistoryItem }) => (
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.cardHeader}>
                 <View>

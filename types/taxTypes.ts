@@ -46,13 +46,10 @@ export interface TaxBreakdown {
     netIncome: number;
 }
 
-export interface CalculationHistory {
-    id: string;
-    date: Date;
-    grossIncome: number;
-    totalTax: number;
-    netIncome: number;
-    incomeType: 'monthly' | 'annual' | 'weekly';
+export interface CalculationHistoryItem extends Partial<TaxBreakdown> {
+    _id: string;
+    createdAt: number;
+    incomeType?: IncomeType;
 }
 
 export type IncomeType = 'monthly' | 'annual' | 'weekly';
