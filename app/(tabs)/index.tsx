@@ -4,11 +4,14 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTaxMode } from '@/contexts/TaxModeContext';
+import TaxModeToggle from '@/components/TaxModeToggle';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
   const { user } = useAuth();
   const router = useRouter();
+  const { taxMode } = useTaxMode();
 
   const navigateToCalculator = (type: 'monthly' | 'annual' | 'weekly') => {
     router.push({
@@ -28,8 +31,8 @@ export default function HomeScreen() {
     },
     header: {
       backgroundColor: colors.surface,
-      padding: 20,
-      paddingTop: 50,
+      padding: 10,
+      paddingTop: 40,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
@@ -37,7 +40,7 @@ export default function HomeScreen() {
       fontSize: 24,
       fontWeight: 'bold',
       color: colors.text,
-      marginBottom: 4,
+      marginBottom: 2,
     },
     subtitle: {
       fontSize: 13,
@@ -96,54 +99,74 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hello, {user?.name.split(' ')[0] || 'Guest'}! 👋</Text>
+        <Text style={styles.greeting}>Hello, Taxpayer 👋</Text>
         <Text style={styles.subtitle}>Welcome to your Tax Assistant</Text>
       </View>
 
       <ScrollView style={styles.content}>
+        <TaxModeToggle />
+
         <Text style={styles.sectionTitle}>What would you like to do?</Text>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigateToCalculator('monthly')}
-        >
-          <View style={styles.iconContainer}>
-            <Ionicons name="calendar-outline" size={24} color={colors.primary} />
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>Calculate Monthly Tax</Text>
-            <Text style={styles.cardDescription}>Compute taxes on your monthly earnings</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-        </TouchableOpacity>
+        {taxMode === 'personal' ? (
+          <>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigateToCalculator('monthly')}
+            >
+              <View style={styles.iconContainer}>
+                <Ionicons name="calendar-outline" size={24} color={colors.primary} />
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>Calculate Monthly Tax</Text>
+                <Text style={styles.cardDescription}>Compute taxes on your monthly earnings</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigateToCalculator('annual')}
-        >
-          <View style={[styles.iconContainer, { backgroundColor: '#10b98120' }]}>
-            <Ionicons name="calendar-number-outline" size={24} color="#10b981" />
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>Calculate Annual Tax</Text>
-            <Text style={styles.cardDescription}>Compute taxes on your yearly income</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigateToCalculator('annual')}
+            >
+              <View style={[styles.iconContainer, { backgroundColor: '#10b98120' }]}>
+                <Ionicons name="calendar-number-outline" size={24} color="#10b981" />
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>Calculate Annual Tax</Text>
+                <Text style={styles.cardDescription}>Compute taxes on your yearly income</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigateToCalculator('weekly')}
-        >
-          <View style={[styles.iconContainer, { backgroundColor: '#6366f120' }]}>
-            <Ionicons name="time-outline" size={24} color="#6366f1" />
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>Calculate Weekly Tax</Text>
-            <Text style={styles.cardDescription}>Compute taxes on your weekly earnings</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigateToCalculator('weekly')}
+            >
+              <View style={[styles.iconContainer, { backgroundColor: '#6366f120' }]}>
+                <Ionicons name="time-outline" size={24} color="#6366f1" />
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>Calculate Weekly Tax</Text>
+                <Text style={styles.cardDescription}>Compute taxes on your weekly earnings</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+          </>
+        ) : (
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigateToCalculator('annual')}
+          >
+            <View style={[styles.iconContainer, { backgroundColor: '#f59e0b20' }]}>
+              <Ionicons name="briefcase-outline" size={24} color="#f59e0b" />
+            </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Calculate Business Tax</Text>
+              <Text style={styles.cardDescription}>Compute company income tax and development levy</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={styles.card}

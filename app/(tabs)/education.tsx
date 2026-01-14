@@ -104,8 +104,8 @@ export default function EducationScreen() {
         },
         header: {
             backgroundColor: colors.surface,
-            padding: 20,
-            paddingTop: 50,
+            padding: 10,
+            paddingTop: 40,
             borderBottomWidth: 1,
             borderBottomColor: colors.border,
         },

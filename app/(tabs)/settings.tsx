@@ -84,13 +84,10 @@ export default function SettingsScreen() {
     },
     header: {
       backgroundColor: colors.surface,
-      padding: 20,
-      paddingTop: 50,
+      padding: 10,
+      paddingTop: 40,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
     },
     headerTitle: {
       fontSize: 24,
@@ -248,7 +245,7 @@ export default function SettingsScreen() {
                 value={isDarkMode}
                 onValueChange={toggleDarkMode}
                 trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#ffffff"
+                thumbColor={isDarkMode ? '#FFFFFF' : colors.bg}
               />
             </View>
           </View>
@@ -273,7 +270,7 @@ export default function SettingsScreen() {
                 value={hasPassword}
                 onValueChange={handleLockToggle}
                 trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#ffffff"
+                thumbColor={hasPassword ? '#FFFFFF' : colors.bg}
               />
             </View>
 
@@ -312,7 +309,7 @@ export default function SettingsScreen() {
                   value={isBiometricEnabled}
                   onValueChange={setBiometricEnabled}
                   trackColor={{ false: colors.border, true: colors.primary }}
-                  thumbColor="#ffffff"
+                  thumbColor={isBiometricEnabled ? '#FFFFFF' : colors.bg}
                 />
               </View>
             )}

@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import { TaxBracket, TaxReliefs, TaxBreakdown } from '../types/taxTypes';
+import { TaxBracket, TaxReliefs, TaxBreakdown, CustomDeduction } from '../types/taxTypes';
 
 /**
  * ============================================================================
@@ -156,17 +156,36 @@ export function calculateTax(
     // Calculate Rent Relief (replaces CRA in 2026)
     const rentRelief = calculateRentRelief(reliefs.rentPaid || 0);
 
-    // Total all reliefs
+    // ========================================
+    // STEP 1.5: Process Custom Deductions
+    // ========================================
+
+    let customDeductionsTotal = 0;
+    let customTaxableAdditions = 0;
+    const customDeductions = reliefs.customDeductions || [];
+
+    // Process each custom deduction
+    customDeductions.forEach((deduction) => {
+        if (deduction.isTaxable) {
+            // If marked as taxable, it's added to taxable income (not a deduction)
+            customTaxableAdditions += deduction.amount;
+        } else {
+            // If not taxable, it's a deduction from taxable income
+            customDeductionsTotal += deduction.amount;
+        }
+    });
+
+    // Total all reliefs (including custom deductions)
     const totalReliefs =
-        pensionRelief + nhfRelief + nhisRelief + lifeInsuranceRelief + rentRelief;
+        pensionRelief + nhfRelief + nhisRelief + lifeInsuranceRelief + rentRelief + customDeductionsTotal;
 
     // ========================================
     // STEP 2: Calculate Taxable Income
     // ========================================
 
-    // Taxable income = Gross income - Total reliefs
+    // Taxable income = Gross income - Total reliefs + Custom taxable additions
     // Cannot be negative
-    const taxableIncome = Math.max(0, grossIncome - totalReliefs);
+    const taxableIncome = Math.max(0, grossIncome - totalReliefs + customTaxableAdditions);
 
     // ========================================
     // STEP 3: Apply Progressive Tax Brackets
@@ -231,6 +250,8 @@ export function calculateTax(
         nhisRelief,
         lifeInsuranceRelief,
         rentRelief,
+        customDeductionsTotal,
+        customDeductions,
         totalReliefs,
         taxableIncome,
         taxPerBracket,
@@ -308,6 +329,7 @@ export function calculateTaxFromMonthly(
             ? monthlyToAnnual(monthlyReliefs.lifeInsurance)
             : 0,
         rentPaid: monthlyReliefs.rentPaid || 0, // Rent is already annual
+        customDeductions: monthlyReliefs.customDeductions || [], // Pass through custom deductions
     };
 
     // Calculate annual tax
@@ -341,6 +363,7 @@ export function calculateTaxFromWeekly(
             ? weeklyToAnnual(weeklyReliefs.lifeInsurance)
             : 0,
         rentPaid: weeklyReliefs.rentPaid || 0, // Rent is already annual
+        customDeductions: weeklyReliefs.customDeductions || [], // Pass through custom deductions
     };
 
     // Calculate annual tax
