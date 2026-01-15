@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    ScrollView,
-    Alert,
-    Switch,
-    KeyboardAvoidingView,
-    Platform,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, useGlobalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
@@ -18,25 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTaxMode } from '@/contexts/TaxModeContext';
 import TaxModeToggle from '@/components/TaxModeToggle';
 import BusinessCalculatorForm from '@/components/BusinessCalculatorForm';
-import {
-    calculateTax,
-    calculateTaxFromMonthly,
-    calculateTaxFromWeekly,
-    formatCurrency,
-    calculateStandardReliefs,
-    formatNumber,
-    parseNumber,
-} from '@/utils/taxCalculations';
+import { calculateTax, calculateTaxFromMonthly, calculateTaxFromWeekly, formatCurrency, calculateStandardReliefs, formatNumber, parseNumber } from '@/utils/taxCalculations';
 import { calculateBusinessTax } from '@/utils/businessTaxCalculations';
-import {
-    TaxBreakdown as TaxBreakdownType,
-    TaxReliefs,
-    BusinessTaxBreakdown,
-    BusinessTaxReliefs,
-    CompanySize,
-    BusinessType,
-    CustomDeduction,
-} from '@/types/taxTypes';
+import { TaxBreakdown as TaxBreakdownType, TaxReliefs, BusinessTaxBreakdown, BusinessTaxReliefs, CompanySize, BusinessType, CustomDeduction } from '@/types/taxTypes';
 import { useTaxHistory } from '@/hooks/useTaxHistory';
 
 export default function CalculatorScreen() {
@@ -888,14 +861,6 @@ export default function CalculatorScreen() {
                                 <Text style={styles.resultSubtitle}>
                                     After tax deduction
                                 </Text>
-
-                                <TouchableOpacity
-                                    style={[styles.saveButton, { backgroundColor: editMode ? colors.primary : colors.success }]}
-                                    onPress={handleSave}
-                                >
-                                    <Ionicons name={editMode ? "save" : "bookmark"} size={18} color="#fff" style={{ marginRight: 8 }} />
-                                    <Text style={styles.saveButtonText}>{editMode ? "Update Calculation" : "Save to My Taxes"}</Text>
-                                </TouchableOpacity>
                             </View>
 
                             <View style={styles.divider} />
@@ -1023,6 +988,14 @@ export default function CalculatorScreen() {
                                     {formatCurrency(taxBreakdown.totalTax)}
                                 </Text>
                             </View>
+
+                            <TouchableOpacity
+                                style={[styles.saveButton, { backgroundColor: editMode ? colors.primary : colors.success, alignSelf: 'center', marginTop: 20 }]}
+                                onPress={handleSave}
+                            >
+                                <Ionicons name={editMode ? "save" : "bookmark"} size={18} color="#fff" style={{ marginRight: 8 }} />
+                                <Text style={styles.saveButtonText}>{editMode ? "Update Calculation" : "Save to My Taxes"}</Text>
+                            </TouchableOpacity>
                         </View>
                     )}
 
@@ -1037,14 +1010,6 @@ export default function CalculatorScreen() {
                                 <Text style={styles.resultSubtitle}>
                                     After tax deduction • {businessTaxBreakdown.effectiveTaxRate.toFixed(2)}% effective rate
                                 </Text>
-
-                                <TouchableOpacity
-                                    style={[styles.saveButton, { backgroundColor: editMode ? colors.primary : colors.success }]}
-                                    onPress={handleSave}
-                                >
-                                    <Ionicons name={editMode ? "save" : "bookmark"} size={18} color="#fff" style={{ marginRight: 8 }} />
-                                    <Text style={styles.saveButtonText}>{editMode ? "Update Calculation" : "Save to My Taxes"}</Text>
-                                </TouchableOpacity>
                             </View>
 
                             <View style={styles.divider} />
@@ -1253,6 +1218,14 @@ export default function CalculatorScreen() {
                                     {formatCurrency(businessTaxBreakdown.totalTax)}
                                 </Text>
                             </View>
+
+                            <TouchableOpacity
+                                style={[styles.saveButton, { backgroundColor: editMode ? colors.primary : colors.success, alignSelf: 'center', marginTop: 20 }]}
+                                onPress={handleSave}
+                            >
+                                <Ionicons name={editMode ? "save" : "bookmark"} size={18} color="#fff" style={{ marginRight: 8 }} />
+                                <Text style={styles.saveButtonText}>{editMode ? "Update Calculation" : "Save to My Taxes"}</Text>
+                            </TouchableOpacity>
                         </View>
                     )}
 

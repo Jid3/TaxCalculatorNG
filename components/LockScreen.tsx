@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    SafeAreaView,
-    KeyboardAvoidingView,
-    Platform,
-    Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
 import { useSecurity } from '@/contexts/SecurityContext';
@@ -40,6 +30,7 @@ export default function LockScreen() {
                 style={styles.inner}
             >
                 <View style={styles.header}>
+                    <Text style={[styles.welcomeText, { color: colors.text }]}>Welcome back 😊</Text>
                     <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
                         <Ionicons name="lock-closed" size={40} color={colors.primary} />
                     </View>
@@ -101,6 +92,11 @@ const styles = StyleSheet.create({
     header: {
         alignItems: 'center',
         marginBottom: 40,
+    },
+    welcomeText: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 20,
     },
     iconContainer: {
         width: 80,

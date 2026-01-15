@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Switch,
-  Alert,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import { View,Text,StyleSheet,ScrollView,Switch,Alert,Modal,TextInput,TouchableOpacity,} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
@@ -23,13 +13,16 @@ export default function SettingsScreen() {
     hasPassword,
     isBiometricEnabled,
     isBiometricAvailable,
+    lockTimeout,
     setPassword,
     setBiometricEnabled,
+    setLockTimeout,
     removeSecurity
   } = useSecurity();
   const router = useRouter();
 
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+  const [isTimeoutModalVisible, setIsTimeoutModalVisible] = useState(false);
   const [newPIN, setNewPIN] = useState('');
   const [confirmPIN, setConfirmPIN] = useState('');
   const [showPIN, setShowPIN] = useState(false);
@@ -74,6 +67,28 @@ export default function SettingsScreen() {
       Alert.alert('Success', 'Security settings updated');
     } catch (error) {
       Alert.alert('Error', 'Failed to save PIN');
+    }
+  };
+
+  const handleTimeoutChange = async (timeout: number) => {
+    try {
+      await setLockTimeout(timeout);
+      setIsTimeoutModalVisible(false);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update timeout setting');
+    }
+  };
+
+  const getTimeoutLabel = (timeout: number): string => {
+    switch (timeout) {
+      case 60000:
+        return '1 minute';
+      case 300000:
+        return '5 minutes';
+      case 600000:
+        return '10 minutes';
+      default:
+        return '1 minute';
     }
   };
 
@@ -214,6 +229,33 @@ export default function SettingsScreen() {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    timeoutOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+    },
+    timeoutOptionLast: {
+      borderBottomWidth: 0,
+    },
+    radioOuter: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 2,
+      marginRight: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioInner: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+    },
+    timeoutLabel: {
+      fontSize: 16,
+      flex: 1,
+    },
   });
 
   return (
@@ -273,6 +315,25 @@ export default function SettingsScreen() {
                 thumbColor={hasPassword ? '#FFFFFF' : colors.bg}
               />
             </View>
+
+            {/* Auto-Lock Timeout */}
+            {hasPassword && (
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={() => setIsTimeoutModalVisible(true)}
+              >
+                <View style={styles.settingIcon}>
+                  <Ionicons name="time-outline" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingTitle}>Auto-Lock Timeout</Text>
+                  <Text style={styles.settingDescription}>
+                    Lock after {getTimeoutLabel(lockTimeout)} of inactivity
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+            )}
 
             {/* Change Password */}
             {hasPassword && (
@@ -390,6 +451,67 @@ export default function SettingsScreen() {
                 <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>Save</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Timeout Selection Modal */}
+      <Modal
+        visible={isTimeoutModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsTimeoutModalVisible(false)}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              Auto-Lock Timeout
+            </Text>
+
+            <View style={{ marginBottom: 20 }}>
+              <TouchableOpacity
+                style={[styles.timeoutOption, { borderBottomColor: colors.border }]}
+                onPress={() => handleTimeoutChange(60000)}
+              >
+                <View style={[styles.radioOuter, { borderColor: colors.primary }]}>
+                  {lockTimeout === 60000 && (
+                    <View style={[styles.radioInner, { backgroundColor: colors.primary }]} />
+                  )}
+                </View>
+                <Text style={[styles.timeoutLabel, { color: colors.text }]}>1 minute</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.timeoutOption, { borderBottomColor: colors.border }]}
+                onPress={() => handleTimeoutChange(300000)}
+              >
+                <View style={[styles.radioOuter, { borderColor: colors.primary }]}>
+                  {lockTimeout === 300000 && (
+                    <View style={[styles.radioInner, { backgroundColor: colors.primary }]} />
+                  )}
+                </View>
+                <Text style={[styles.timeoutLabel, { color: colors.text }]}>5 minutes</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.timeoutOption, styles.timeoutOptionLast]}
+                onPress={() => handleTimeoutChange(600000)}
+              >
+                <View style={[styles.radioOuter, { borderColor: colors.primary }]}>
+                  {lockTimeout === 600000 && (
+                    <View style={[styles.radioInner, { backgroundColor: colors.primary }]} />
+                  )}
+                </View>
+                <Text style={[styles.timeoutLabel, { color: colors.text }]}>10 minutes</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: colors.primary, width: '100%' }]}
+              onPress={() => setIsTimeoutModalVisible(false)}
+            >
+              <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>Done</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

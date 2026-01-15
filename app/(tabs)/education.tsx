@@ -15,12 +15,13 @@ export default function EducationScreen() {
     const educationData = {
         individual: {
             taxable: [
-                { title: "Basic Monthly Salary", explanation: "The fixed amount paid to an employee every month before any deductions or additions. This is the foundation of your taxable income." },
+                { title: "Employment Remuneration (Salary)", explanation: "This includes salaries, wages, fees, allowances, bonuses, and any other perquisites granted by an employer." },
                 { title: "Periodic Bonuses", explanation: "Occasional payments made to employees, such as performance bonuses, holiday bonuses, or 13th-month pay." },
                 { title: "Commissions & Incentives", explanation: "Payments made to employees based on sales targets or performance achievements. These are fully taxable as earned income." },
                 { title: "Housing Allowance (above reliefs)", explanation: "Payment for housing. Any amount above the legally allowed tax relief is subject to tax under the Personal Income Tax Act." },
                 { title: "Transport & Other Allowances", explanation: "Regular payments for commuting and other miscellaneous work-related costs are considered part of your gross taxable income." },
-                { title: "Overtime Payments", explanation: "Additional pay for hours worked beyond the standard work week. All overtime earnings are added to your taxable gross income." }
+                { title: "Overtime Payments", explanation: "Additional pay for hours worked beyond the standard work week. All overtime earnings are added to your taxable gross income." },
+                { title: "Benefits-in-Kind (BIK)", explanation: "Asset Use: If an employee uses an employer's asset, they are deemed to have earned a benefit equal to 5% of the asset's acquisition cost. \n\nAcommodation: Living accommodation provided by an employer is treated as income equal to its annual rental value, capped at 20% of the employee's annual gross income." }
             ],
             nonTaxable: [
                 { title: "First ₦800,000 Annual Income", explanation: "Under the 2026 Tax Act, the first ₦800,000 you earn in a year is completely tax-free. This is the 'Tax-Free Threshold'." },
@@ -28,7 +29,8 @@ export default function EducationScreen() {
                 { title: "National Housing Fund (NHF) Contribution (2.5%)", explanation: "Mandatory contribution towards the national housing scheme (2.5% of basic salary) is exempt from personal income tax." },
                 { title: "Rent Relief (Lesser of ₦200k or 20% of rent)", explanation: "A new relief for 2026. You can deduct the lower of ₦200,000 or 20% of your annual rent from your taxable income." },
                 { title: "National Health Insurance (NHIS)", explanation: "Contributions to the national health insurance scheme are tax-deductible to encourage healthcare coverage for employees." },
-                { title: "Life Insurance Premiums", explanation: "Payments for life insurance policies are exempted from tax to promote financial security for families." }
+                { title: "Life Insurance Premiums", explanation: "Payments for life insurance policies are exempted from tax to promote financial security for families." },
+                { title: "Capital Gains Exemptions", explanation: "Principal Private Residence: Disposal is exempt once in an individual's lifetime.\n\nPrivate Motor Vehicles: Up to two vehicles per year used for non-profit purposes are exempt.\n\nPersonal Chattels: Tangible movable property is exempt if the disposal consideration is below ₦5 million or three times the minimum wage.\n\nInjury Compensation: Sums up to ₦50 million for personal injury, libel, or slander are exempt.\n\nGifts: Assets acquired or disposed of as a gift (where no money is paid) do not incur chargeable gains tax." }
             ]
         },
         business: {
@@ -194,7 +196,7 @@ export default function EducationScreen() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Tax Education</Text>
-                <Text style={styles.headerSubtitle}>Understanding the 2026 Nigeria Tax Act</Text>
+                <Text style={styles.headerSubtitle}>Understanding the 2025 Nigeria Tax Act</Text>
             </View>
 
             <View style={styles.tabContainer}>
@@ -235,8 +237,8 @@ export default function EducationScreen() {
                     <Ionicons name="information-circle" size={24} color={colors.primary} style={{ marginRight: 12 }} />
                     <Text style={[styles.infoText, { color: colors.text }]}>
                         {activeTab === 'individual'
-                            ? "The 2026 Tax Act focuses on simplifying personal income tax while increasing the tax-free threshold to ₦800,000 annually."
-                            : "For small and medium businesses, the 2026 Act provides several exemptions to encourage formalization and growth."}
+                            ? "Based on the Nigeria Tax Act, 2025, taxable and non-taxable items are categorized according to whether they apply to the profits of a business entity or the income of an individual."
+                            : "For business owners, the Act focuses on profits, transactions, and specialized levies related to commercial operations. Small companies with turnover ≤₦50 million are taxed at 0%."}
                     </Text>
                 </View>
 
@@ -267,6 +269,15 @@ export default function EducationScreen() {
                         />
                     </>
                 )}
+
+                {/* Disclaimer */}
+                <View style={[styles.infoBox, { backgroundColor: colors.warning + '15', borderWidth: 1, borderColor: colors.warning + '30' }]}>
+                    <Ionicons name="warning-outline" size={24} color={colors.warning} style={{ marginRight: 12 }} />
+                    <Text style={[styles.infoText, { color: colors.text }]}>
+                        <Text style={{ fontWeight: 'bold' }}>Disclaimer: </Text>
+                        The information provided in this education tab is for general guidance only and is subject to change. Tax laws and regulations may be updated or amended. Always consult a qualified legal or financial adviser for advice specific to your situation.
+                    </Text>
+                </View>
 
                 <View style={{ height: 40 }} />
             </ScrollView>
