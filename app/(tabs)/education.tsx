@@ -275,7 +275,7 @@ export default function EducationScreen() {
                     <Ionicons name="warning-outline" size={24} color={colors.warning} style={{ marginRight: 12 }} />
                     <Text style={[styles.infoText, { color: colors.text }]}>
                         <Text style={{ fontWeight: 'bold' }}>Disclaimer: </Text>
-                        The information provided in this education tab is for general guidance only and is subject to change. Tax laws and regulations may be updated or amended. Always consult a qualified legal or financial adviser for advice specific to your situation.
+                        The information provided here is for general guidance only and is subject to change. Tax laws and regulations may be updated or amended. Always consult a qualified legal or financial adviser for advice specific to your situation.
                     </Text>
                 </View>
 

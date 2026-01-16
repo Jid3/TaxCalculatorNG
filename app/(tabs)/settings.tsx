@@ -384,7 +384,7 @@ export default function SettingsScreen() {
             <Text style={styles.aboutText}>
               Nigerian Tax Calculator helps you calculate your taxes based on the 2026
               Nigeria Tax Act. All calculations include the latest tax brackets, reliefs,
-              and allowances.
+              and allowances. Always consult a qualified legal or financial adviser for advice specific to your situation.
             </Text>
             <Text style={styles.versionText}>Version 1.0.0</Text>
           </View>
