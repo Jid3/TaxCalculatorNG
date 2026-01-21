@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View,Text,StyleSheet,ScrollView,Switch,Alert,Modal,TextInput,TouchableOpacity,} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, Alert, Modal, TextInput, TouchableOpacity, Linking, } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';

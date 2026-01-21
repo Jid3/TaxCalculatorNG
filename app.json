@@ -4,14 +4,14 @@
     "slug": "nigerian-tax-calculator",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/iconng.png",
+    "icon": "./assets/images/iconTaxCalc.png",
     "scheme": "taxcalculator",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/splash1.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "white"
     },
     "ios": {
       "supportsTablet": true,
@@ -30,10 +30,16 @@
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
       ],
+      "icon": "./assets/images/iconTaxCalc.png",
       "adaptiveIcon": {
         "backgroundColor": "#7CB342",
         "foregroundImage": "./assets/images/foreground.png",
         "monochromeImage": "./assets/images/monochrome.png"
+      },
+      "splash": {
+        "image": "./assets/images/splash1.png",
+        "resizeMode": "contain",
+        "backgroundColor": "white"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -42,21 +48,17 @@
         "backgroundColor": "transparent"
       }
     },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.ico"
-    },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash.png",
+          "image": "./assets/images/splash1.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#000000",
           "dark": {
-            "image": "./assets/images/splash.png",
+            "image": "./assets/images/splash1.png",
             "backgroundColor": "#000000"
           }
         }
@@ -66,11 +68,11 @@
         {
           "faceIDPermission": "Allow TaxNaija to use Face ID for secure app access."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     },
     "extra": {
       "router": {},

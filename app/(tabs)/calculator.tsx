@@ -8,7 +8,7 @@ import { useTaxMode } from '@/contexts/TaxModeContext';
 import TaxModeToggle from '@/components/TaxModeToggle';
 import BusinessCalculatorForm from '@/components/BusinessCalculatorForm';
 import { calculateTax, calculateTaxFromMonthly, calculateTaxFromWeekly, formatCurrency, calculateStandardReliefs, formatNumber, parseNumber } from '@/utils/taxCalculations';
-import { calculateBusinessTax } from '@/utils/businessTaxCalculations';
+import { calculateBusinessTax, calculateBusinessTaxFromMonthly, calculateBusinessTaxFromWeekly } from '@/utils/businessTaxCalculations';
 import { TaxBreakdown as TaxBreakdownType, TaxReliefs, BusinessTaxBreakdown, BusinessTaxReliefs, CompanySize, BusinessType, CustomDeduction } from '@/types/taxTypes';
 import { useTaxHistory } from '@/hooks/useTaxHistory';
 
@@ -21,6 +21,9 @@ export default function CalculatorScreen() {
 
     // Income type toggle (for personal tax)
     const [incomeType, setIncomeType] = useState<'monthly' | 'annual' | 'weekly'>('monthly');
+
+    // Business income type toggle
+    const [businessIncomeType, setBusinessIncomeType] = useState<'monthly' | 'annual' | 'weekly'>('annual');
 
     // Income inputs
     const [income, setIncome] = useState('');
@@ -159,12 +162,30 @@ export default function CalculatorScreen() {
                 customDeductions: customDeductions,
             };
 
-            const result = calculateBusinessTax(
-                incomeValue,
-                companySize,
-                businessType,
-                businessReliefs
-            );
+            let result: BusinessTaxBreakdown;
+
+            if (businessIncomeType === 'monthly') {
+                result = calculateBusinessTaxFromMonthly(
+                    incomeValue,
+                    companySize,
+                    businessType,
+                    businessReliefs
+                );
+            } else if (businessIncomeType === 'weekly') {
+                result = calculateBusinessTaxFromWeekly(
+                    incomeValue,
+                    companySize,
+                    businessType,
+                    businessReliefs
+                );
+            } else {
+                result = calculateBusinessTax(
+                    incomeValue,
+                    companySize,
+                    businessType,
+                    businessReliefs
+                );
+            }
 
             setBusinessTaxBreakdown(result);
             setTaxBreakdown(null);
@@ -815,6 +836,8 @@ export default function CalculatorScreen() {
                             colors={colors}
                             income={income}
                             setIncome={setIncome}
+                            incomeType={businessIncomeType}
+                            setIncomeType={setBusinessIncomeType}
                             companySize={companySize}
                             setCompanySize={setCompanySize}
                             businessType={businessType}
@@ -1010,6 +1033,44 @@ export default function CalculatorScreen() {
                                 <Text style={styles.resultSubtitle}>
                                     After tax deduction • {businessTaxBreakdown.effectiveTaxRate.toFixed(2)}% effective rate
                                 </Text>
+                            </View>
+
+                            <View style={styles.divider} />
+
+                            {/* Period-based Breakdown */}
+                            <Text style={styles.cardTitle}>Income & Tax Breakdown</Text>
+                            <View style={styles.breakdownRow}>
+                                <Text style={styles.breakdownLabel}>Annual</Text>
+                                <View style={{ alignItems: 'flex-end' }}>
+                                    <Text style={styles.breakdownValue}>
+                                        {formatCurrency(businessTaxBreakdown.netIncome)} net
+                                    </Text>
+                                    <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                                        {formatCurrency(businessTaxBreakdown.totalTax)} tax
+                                    </Text>
+                                </View>
+                            </View>
+                            <View style={styles.breakdownRow}>
+                                <Text style={styles.breakdownLabel}>Monthly</Text>
+                                <View style={{ alignItems: 'flex-end' }}>
+                                    <Text style={styles.breakdownValue}>
+                                        {formatCurrency(businessTaxBreakdown.netIncome / 12)} net
+                                    </Text>
+                                    <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                                        {formatCurrency(businessTaxBreakdown.totalTax / 12)} tax
+                                    </Text>
+                                </View>
+                            </View>
+                            <View style={styles.breakdownRow}>
+                                <Text style={styles.breakdownLabel}>Weekly</Text>
+                                <View style={{ alignItems: 'flex-end' }}>
+                                    <Text style={styles.breakdownValue}>
+                                        {formatCurrency(businessTaxBreakdown.netIncome / 52)} net
+                                    </Text>
+                                    <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                                        {formatCurrency(businessTaxBreakdown.totalTax / 52)} tax
+                                    </Text>
+                                </View>
                             </View>
 
                             <View style={styles.divider} />

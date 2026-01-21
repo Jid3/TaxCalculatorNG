@@ -405,3 +405,61 @@ export function calculateStandardBusinessContributions(totalEmployeeSalaries: nu
         nhf: totalEmployeeSalaries * 0.025, // 2.5% NHF contribution
     };
 }
+
+/**
+ * ============================================================================
+ * CALCULATE BUSINESS TAX FROM MONTHLY INCOME
+ * ============================================================================
+ * 
+ * Convenience function to calculate business tax when you have monthly income.
+ * Converts monthly income to annual and calculates tax accordingly.
+ * 
+ * @param monthlyIncome - Monthly business income/turnover
+ * @param companySize - Company size classification
+ * @param businessType - Type of business (for exemptions)
+ * @param reliefs - Object containing all relief and deduction amounts
+ * @param totalFixedAssets - Total fixed assets (for small company determination)
+ * @returns Detailed business tax breakdown with annual figures
+ */
+export function calculateBusinessTaxFromMonthly(
+    monthlyIncome: number,
+    companySize: CompanySize,
+    businessType: BusinessType,
+    reliefs: BusinessTaxReliefs = {},
+    totalFixedAssets: number = 0
+): BusinessTaxBreakdown {
+    // Convert monthly income to annual (multiply by 12)
+    const annualIncome = monthlyIncome * 12;
+
+    // Calculate tax using annual income
+    return calculateBusinessTax(annualIncome, companySize, businessType, reliefs, totalFixedAssets);
+}
+
+/**
+ * ============================================================================
+ * CALCULATE BUSINESS TAX FROM WEEKLY INCOME
+ * ============================================================================
+ * 
+ * Convenience function to calculate business tax when you have weekly income.
+ * Converts weekly income to annual and calculates tax accordingly.
+ * 
+ * @param weeklyIncome - Weekly business income/turnover
+ * @param companySize - Company size classification
+ * @param businessType - Type of business (for exemptions)
+ * @param reliefs - Object containing all relief and deduction amounts
+ * @param totalFixedAssets - Total fixed assets (for small company determination)
+ * @returns Detailed business tax breakdown with annual figures
+ */
+export function calculateBusinessTaxFromWeekly(
+    weeklyIncome: number,
+    companySize: CompanySize,
+    businessType: BusinessType,
+    reliefs: BusinessTaxReliefs = {},
+    totalFixedAssets: number = 0
+): BusinessTaxBreakdown {
+    // Convert weekly income to annual (multiply by 52)
+    const annualIncome = weeklyIncome * 52;
+
+    // Calculate tax using annual income
+    return calculateBusinessTax(annualIncome, companySize, businessType, reliefs, totalFixedAssets);
+}

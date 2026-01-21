@@ -8,6 +8,8 @@ interface BusinessCalculatorFormProps {
     colors: any;
     income: string;
     setIncome: (value: string) => void;
+    incomeType: 'monthly' | 'annual' | 'weekly';
+    setIncomeType: (value: 'monthly' | 'annual' | 'weekly') => void;
     companySize: CompanySize;
     setCompanySize: (value: CompanySize) => void;
     businessType: BusinessType;
@@ -35,6 +37,8 @@ interface BusinessCalculatorFormProps {
 export default function BusinessCalculatorForm(props: BusinessCalculatorFormProps) {
     const {
         colors,
+        incomeType,
+        setIncomeType,
         businessType,
         setBusinessType,
         pension,
@@ -97,6 +101,30 @@ export default function BusinessCalculatorForm(props: BusinessCalculatorFormProp
             padding: 16,
             fontSize: 16,
             color: colors.text,
+        },
+        incomeTypeToggle: {
+            flexDirection: 'row',
+            backgroundColor: colors.bg,
+            borderRadius: 12,
+            padding: 4,
+            marginBottom: 16,
+        },
+        toggleButton: {
+            flex: 1,
+            paddingVertical: 12,
+            alignItems: 'center',
+            borderRadius: 8,
+        },
+        toggleButtonActive: {
+            backgroundColor: colors.primary,
+        },
+        toggleButtonText: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: colors.textMuted,
+        },
+        toggleButtonTextActive: {
+            color: '#ffffff',
         },
         selectorRow: {
             flexDirection: 'row',
@@ -207,11 +235,65 @@ export default function BusinessCalculatorForm(props: BusinessCalculatorFormProp
             <View style={styles.card}>
                 <Text style={styles.cardTitle}>Business Information</Text>
 
+                {/* Income Type Toggle */}
+                <View style={styles.incomeTypeToggle}>
+                    <TouchableOpacity
+                        style={[
+                            styles.toggleButton,
+                            incomeType === 'monthly' && styles.toggleButtonActive,
+                        ]}
+                        onPress={() => setIncomeType('monthly')}
+                    >
+                        <Text
+                            style={[
+                                styles.toggleButtonText,
+                                incomeType === 'monthly' && styles.toggleButtonTextActive,
+                            ]}
+                        >
+                            Monthly
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.toggleButton,
+                            incomeType === 'annual' && styles.toggleButtonActive,
+                        ]}
+                        onPress={() => setIncomeType('annual')}
+                    >
+                        <Text
+                            style={[
+                                styles.toggleButtonText,
+                                incomeType === 'annual' && styles.toggleButtonTextActive,
+                            ]}
+                        >
+                            Annual
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.toggleButton,
+                            incomeType === 'weekly' && styles.toggleButtonActive,
+                        ]}
+                        onPress={() => setIncomeType('weekly')}
+                    >
+                        <Text
+                            style={[
+                                styles.toggleButtonText,
+                                incomeType === 'weekly' && styles.toggleButtonTextActive,
+                            ]}
+                        >
+                            Weekly
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
                 <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Annual Business Income / Turnover (₦)</Text>
+                    <Text style={styles.label}>
+                        {incomeType === 'monthly' ? 'Monthly Business Income / Turnover' : incomeType === 'weekly' ? 'Weekly Business Income / Turnover' : 'Annual Business Income / Turnover'} (₦)
+                    </Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter annual income"
+                        placeholder="Enter amount"
                         placeholderTextColor={colors.textMuted}
                         value={props.income}
                         onChangeText={(text) => props.setIncome(formatNumber(text))}

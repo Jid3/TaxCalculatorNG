@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
@@ -22,6 +22,17 @@ export default function HomeScreen() {
 
   const navigateToEducation = () => {
     router.push('/(tabs)/education');
+  };
+
+  const handleOpenTINWebsite = async () => {
+    const url = 'https://taxid.nrs.gov.ng/';
+    const supported = await Linking.canOpenURL(url);
+
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert('Error', 'Unable to open the TIN registration website');
+    }
   };
 
   const styles = StyleSheet.create({
@@ -180,6 +191,20 @@ export default function HomeScreen() {
             <Text style={styles.cardDescription}>Learn about the 2026 Nigeria Tax Act</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.card}
+          onPress={handleOpenTINWebsite}
+        >
+          <View style={[styles.iconContainer, { backgroundColor: '#ef444420' }]}>
+            <Ionicons name="card-outline" size={24} color="#ef4444" />
+          </View>
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Get Your TIN</Text>
+            <Text style={styles.cardDescription}>Register for a Tax Identification Number</Text>
+          </View>
+          <Ionicons name="open-outline" size={20} color={colors.textMuted} />
         </TouchableOpacity>
 
       </ScrollView>
