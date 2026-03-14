@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Switch, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter, useGlobalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import useTheme from '@/hooks/userTheme';
+import { AdBanner } from '@/components/AdBanner';
+import BusinessCalculatorForm from '@/components/BusinessCalculatorForm';
+import TaxModeToggle from '@/components/TaxModeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaxMode } from '@/contexts/TaxModeContext';
-import TaxModeToggle from '@/components/TaxModeToggle';
-import BusinessCalculatorForm from '@/components/BusinessCalculatorForm';
-import { calculateTax, calculateTaxFromMonthly, calculateTaxFromWeekly, formatCurrency, calculateStandardReliefs, formatNumber, parseNumber } from '@/utils/taxCalculations';
-import { calculateBusinessTax, calculateBusinessTaxFromMonthly, calculateBusinessTaxFromWeekly } from '@/utils/businessTaxCalculations';
-import { TaxBreakdown as TaxBreakdownType, TaxReliefs, BusinessTaxBreakdown, BusinessTaxReliefs, CompanySize, BusinessType, CustomDeduction } from '@/types/taxTypes';
+import useTheme from '@/hooks/userTheme';
 import { useTaxHistory } from '@/hooks/useTaxHistory';
+import { BusinessTaxBreakdown, BusinessTaxReliefs, BusinessType, CompanySize, CustomDeduction, TaxBreakdown as TaxBreakdownType, TaxReliefs } from '@/types/taxTypes';
+import { calculateBusinessTax, calculateBusinessTaxFromMonthly, calculateBusinessTaxFromWeekly } from '@/utils/businessTaxCalculations';
+import { calculateStandardReliefs, calculateTax, calculateTaxFromMonthly, calculateTaxFromWeekly, formatCurrency, formatNumber, parseNumber } from '@/utils/taxCalculations';
+import { Ionicons } from '@expo/vector-icons';
+import { useGlobalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 export default function CalculatorScreen() {
     const { colors } = useTheme();
@@ -580,6 +582,15 @@ export default function CalculatorScreen() {
             fontSize: 13,
             color: colors.text,
             flex: 1,
+        },
+        stickyAdContainer: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: colors.bg,
+            paddingVertical: 4,
+            alignItems: 'center',
         },
     });
 
@@ -1290,9 +1301,14 @@ export default function CalculatorScreen() {
                         </View>
                     )}
 
-                    <View style={{ height: 40 }} />
+                    <View style={{ height: 70 }} />
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Sticky Adaptive Banner Ad at Bottom */}
+            <View style={styles.stickyAdContainer}>
+                <AdBanner size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} />
+            </View>
         </View>
     );
 }

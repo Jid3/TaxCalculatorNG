@@ -1,6 +1,6 @@
-import { Tabs } from "expo-router"
-import { Ionicons } from "@expo/vector-icons"
-import useTheme from "@/hooks/userTheme"
+import useTheme from "@/hooks/userTheme";
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 
 const TabsLayout = () => {
   const { colors } = useTheme();
@@ -57,6 +57,19 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <Ionicons
               name='document-text'
+              size={size}
+              color={color}
+            />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: "Calendar",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name='calendar'
               size={size}
               color={color}
             />

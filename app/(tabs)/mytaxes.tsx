@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
-import { useAuth } from '@/contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
-import useTheme from '@/hooks/userTheme';
-import { formatCurrency } from '@/utils/taxCalculations';
-import { useRouter } from 'expo-router';
-import { useTaxMode } from '@/contexts/TaxModeContext';
+import { AdBanner } from '@/components/AdBanner';
 import TaxModeToggle from '@/components/TaxModeToggle';
-
+import { useAuth } from '@/contexts/AuthContext';
+import { useTaxMode } from '@/contexts/TaxModeContext';
+import useTheme from '@/hooks/userTheme';
 import { useTaxHistory } from '@/hooks/useTaxHistory';
 import { CalculationHistoryItem } from '@/types/taxTypes';
+import { formatCurrency } from '@/utils/taxCalculations';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 export default function MyTaxesScreen() {
     const { colors } = useTheme();
@@ -443,6 +444,15 @@ export default function MyTaxesScreen() {
             fontSize: 14,
             fontWeight: '600',
         },
+        stickyAdContainer: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: colors.bg,
+            paddingVertical: 4,
+            alignItems: 'center',
+        },
     });
 
     if (isLoading) {
@@ -470,7 +480,7 @@ export default function MyTaxesScreen() {
                 data={filteredCalculations}
                 renderItem={renderItem}
                 keyExtractor={(item) => item._id}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={{ ...styles.listContent, paddingBottom: 70 }}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -488,6 +498,11 @@ export default function MyTaxesScreen() {
                     </View>
                 }
             />
+
+            {/* Sticky Adaptive Banner Ad at Bottom */}
+            <View style={styles.stickyAdContainer}>
+                <AdBanner size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} />
+            </View>
         </View>
     );
 }

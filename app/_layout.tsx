@@ -4,12 +4,14 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
 import { TaxHistoryProvider } from "@/contexts/TaxHistoryContext";
 import { TaxModeProvider } from "@/contexts/TaxModeContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import LockScreen from "@/components/LockScreen";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from 'expo-navigation-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect } from "react";
 import { Platform, StatusBar as RNStatusBar } from "react-native";
+import mobileAds from 'react-native-google-mobile-ads';
 
 function RootLayoutContent() {
   const { isLocked } = useSecurity();
@@ -64,15 +66,29 @@ function RootLayoutContent() {
 }
 
 export default function RootLayout() {
+  // Initialize Google Mobile Ads SDK
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .then(adapterStatuses => {
+        console.log('✅ AdMob SDK initialized successfully:', adapterStatuses);
+      })
+      .catch(error => {
+        console.error('❌ AdMob SDK initialization failed:', error);
+      });
+  }, []);
+
   return (
     <ThemeProvider>
       <SecurityProvider>
         <AuthProvider>
-          <TaxHistoryProvider>
-            <TaxModeProvider>
-              <RootLayoutContent />
-            </TaxModeProvider>
-          </TaxHistoryProvider>
+          <NotificationProvider>
+            <TaxHistoryProvider>
+              <TaxModeProvider>
+                <RootLayoutContent />
+              </TaxModeProvider>
+            </TaxHistoryProvider>
+          </NotificationProvider>
         </AuthProvider>
       </SecurityProvider>
     </ThemeProvider>

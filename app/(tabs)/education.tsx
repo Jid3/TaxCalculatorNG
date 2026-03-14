@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { AdBanner } from '@/components/AdBanner';
 import useTheme from '@/hooks/userTheme';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 export default function EducationScreen() {
     const { colors } = useTheme();
@@ -190,6 +192,15 @@ export default function EducationScreen() {
             fontSize: 14,
             lineHeight: 20,
         },
+        stickyAdContainer: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: colors.bg,
+            paddingVertical: 4,
+            alignItems: 'center',
+        },
     });
 
     return (
@@ -232,7 +243,10 @@ export default function EducationScreen() {
                 </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.content}>
+            <ScrollView
+                style={styles.content}
+                contentContainerStyle={{ paddingBottom: 70 }}
+            >
                 <View style={[styles.infoBox, { backgroundColor: colors.primary + '10' }]}>
                     <Ionicons name="information-circle" size={24} color={colors.primary} style={{ marginRight: 12 }} />
                     <Text style={[styles.infoText, { color: colors.text }]}>
@@ -281,6 +295,11 @@ export default function EducationScreen() {
 
                 <View style={{ height: 40 }} />
             </ScrollView>
+
+            {/* Sticky Adaptive Banner Ad at Bottom */}
+            <View style={styles.stickyAdContainer}>
+                <AdBanner size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} />
+            </View>
         </View>
     );
 }

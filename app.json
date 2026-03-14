@@ -2,7 +2,7 @@
   "expo": {
     "name": "TaxNaija",
     "slug": "nigerian-tax-calculator",
-    "version": "1.0.0",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/iconTaxCalc.png",
     "scheme": "taxcalculator",
@@ -23,7 +23,7 @@
     },
     "android": {
       "package": "com.jideDev.taxnaija",
-      "versionCode": 1,
+      "versionCode": 3,
       "permissions": [
         "USE_BIOMETRIC",
         "USE_FINGERPRINT",
@@ -69,7 +69,22 @@
           "faceIDPermission": "Allow TaxNaija to use Face ID for secure app access."
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-2599860932009835~4262722090"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true
+          }
+        }
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true

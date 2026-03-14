@@ -1,11 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import useTheme from '@/hooks/userTheme';
+import { AdBanner } from '@/components/AdBanner';
+import TaxModeToggle from '@/components/TaxModeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaxMode } from '@/contexts/TaxModeContext';
-import TaxModeToggle from '@/components/TaxModeToggle';
+import useTheme from '@/hooks/userTheme';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
@@ -104,6 +106,15 @@ export default function HomeScreen() {
       fontSize: 13,
       color: colors.textMuted,
     },
+    stickyAdContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.bg,
+      paddingVertical: 4,
+      alignItems: 'center',
+    },
   });
 
 
@@ -114,7 +125,10 @@ export default function HomeScreen() {
         <Text style={styles.subtitle}>Welcome to your Tax Assistant</Text>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: 70 }}  // Space for sticky ad
+      >
         <TaxModeToggle />
 
         <Text style={styles.sectionTitle}>What would you like to do?</Text>
@@ -206,8 +220,12 @@ export default function HomeScreen() {
           </View>
           <Ionicons name="open-outline" size={20} color={colors.textMuted} />
         </TouchableOpacity>
-
       </ScrollView>
+
+      {/* Sticky Adaptive Banner Ad at Bottom */}
+      <View style={styles.stickyAdContainer}>
+        <AdBanner size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} />
+      </View>
     </View>
   );
 }

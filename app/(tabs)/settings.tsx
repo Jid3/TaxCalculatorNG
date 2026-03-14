@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSecurity } from '@/contexts/SecurityContext';
+import { useNotifications } from '@/contexts/NotificationContext';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function SettingsScreen() {
   const { colors, isDarkMode, toggleDarkMode } = useTheme();
@@ -26,6 +28,15 @@ export default function SettingsScreen() {
   const [newPIN, setNewPIN] = useState('');
   const [confirmPIN, setConfirmPIN] = useState('');
   const [showPIN, setShowPIN] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  
+  const { 
+    notificationTimes, 
+    addNotificationTime, 
+    removeNotificationTime, 
+    hasPermission, 
+    requestPermission 
+  } = useNotifications();
 
   // For guest mode, displayUser is just the local user
   const displayUser = user || { name: 'Guest User', email: 'guest@example.com', imageUrl: null, userId: 'guest' };
@@ -90,6 +101,27 @@ export default function SettingsScreen() {
       default:
         return '1 minute';
     }
+  };
+
+  const handleTimeChange = async (event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (event.type === 'set' && selectedTime) {
+      if (!hasPermission) {
+        const granted = await requestPermission();
+        if (!granted) {
+          Alert.alert('Permission Required', 'Please enable notifications in your device settings.');
+          return;
+        }
+      }
+      await addNotificationTime(selectedTime.getHours(), selectedTime.getMinutes());
+    }
+  };
+
+  const formatTime = (hour: number, minute: number) => {
+    const d = new Date();
+    d.setHours(hour);
+    d.setMinutes(minute);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   const styles = StyleSheet.create({
@@ -377,6 +409,44 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          <View style={styles.settingCard}>
+            {notificationTimes.map((time, index) => (
+               <View key={time.id} style={[styles.settingItem, index === notificationTimes.length - 1 ? styles.settingItemLast : null]}>
+                 <View style={styles.settingIcon}>
+                   <Ionicons name="notifications" size={20} color={colors.primary} />
+                 </View>
+                 <View style={styles.settingContent}>
+                   <Text style={styles.settingTitle}>Daily Reminder</Text>
+                   <Text style={styles.settingDescription}>
+                     {formatTime(time.hour, time.minute)}
+                   </Text>
+                 </View>
+                 <TouchableOpacity
+                   onPress={() => removeNotificationTime(time.id)}
+                   style={{ padding: 8 }}
+                 >
+                   <Ionicons name="trash-outline" size={20} color={'#EF4444'} />
+                 </TouchableOpacity>
+               </View>
+            ))}
+            
+            <TouchableOpacity
+              style={[styles.settingItem, notificationTimes.length === 0 ? styles.settingItemLast : { borderTopWidth: 1, borderTopColor: colors.border }]}
+              onPress={() => setShowTimePicker(true)}
+            >
+              <View style={[styles.settingIcon, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="add" size={20} color={colors.primary} />
+              </View>
+              <View style={styles.settingContent}>
+                <Text style={[styles.settingTitle, { color: colors.primary }]}>Add Reminder Time</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* About Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
@@ -515,6 +585,16 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {showTimePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          is24Hour={false}
+          display="default"
+          onChange={handleTimeChange}
+        />
+      )}
     </View>
   );
 }
