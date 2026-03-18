@@ -3,6 +3,8 @@ import { AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
+import * as Crypto from 'expo-crypto';
+import * as Clipboard from 'expo-clipboard';
 
 interface SecurityContextType {
     isLocked: boolean;
@@ -72,7 +74,11 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
             appState.current.match(/active/) &&
             nextAppState.match(/inactive|background/)
         ) {
-            // App went to background, store the timestamp
+            // App went to background
+            // 1. Clear clipboard to prevent sensitive data leakage
+            await Clipboard.setStringAsync('');
+            
+            // 2. Store timestamp for auto-lock
             const password = await SecureStore.getItemAsync(SECURE_KEYS.PASSWORD);
             if (password) {
                 await AsyncStorage.setItem(SECURE_KEYS.BACKGROUND_TIMESTAMP, Date.now().toString());
@@ -97,13 +103,36 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
         }
         appState.current = nextAppState;
     };
+    
+    // Hash PIN before storing or comparing
+    const hashPIN = async (pin: string): Promise<string> => {
+        return await Crypto.digestStringAsync(
+            Crypto.CryptoDigestAlgorithm.SHA256,
+            pin
+        );
+    };
 
     const unlock = async (password: string): Promise<boolean> => {
         try {
             const storedPassword = await SecureStore.getItemAsync(SECURE_KEYS.PASSWORD);
-            if (storedPassword === password) {
-                setIsLocked(false);
-                return true;
+            if (!storedPassword) return false;
+            
+            // Backwards compatibility check: IF the stored password is 6 digits long, it's plainly stored.
+            // A SHA-256 hash will be 64 characters long hex string.
+            if (storedPassword.length === 6) {
+                if (storedPassword === password) {
+                    // It matched! Let's migrate them to hashed format right away
+                    await setPassword(password);
+                    setIsLocked(false);
+                    return true;
+                }
+            } else {
+                // Otherwise we assume it's hashed
+                const hashedAttempt = await hashPIN(password);
+                if (storedPassword === hashedAttempt) {
+                    setIsLocked(false);
+                    return true;
+                }
             }
             return false;
         } catch (error) {
@@ -133,7 +162,8 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
     };
 
     const setPassword = async (password: string) => {
-        await SecureStore.setItemAsync(SECURE_KEYS.PASSWORD, password);
+        const hashedPIN = await hashPIN(password);
+        await SecureStore.setItemAsync(SECURE_KEYS.PASSWORD, hashedPIN);
         setHasPassword(true);
         setIsLocked(false);
     };

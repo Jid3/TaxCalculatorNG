@@ -68,6 +68,7 @@ export const SMALL_COMPANY_ASSETS_THRESHOLD = 250000000; // ₦250 million
  */
 export const COMPANY_INCOME_TAX_RATE = 0.30; // 30% CIT for medium/large companies
 export const DEVELOPMENT_LEVY_RATE = 0.04; // 4% Development Levy
+export const FLAT_TAX_RATE = 0.01; // 1% flat tax on turnover
 export const MINIMUM_EFFECTIVE_TAX_RATE = 0.15; // 15% minimum ETR for very large companies
 export const VERY_LARGE_COMPANY_THRESHOLD = 50000000000; // ₦50 billion turnover
 
@@ -319,10 +320,17 @@ export function calculateBusinessTax(
     }
 
     // ========================================
-    // STEP 7: Calculate Total Tax
+    // STEP 7: Calculate Flat Tax (1% on Turnover)
     // ========================================
 
-    let totalTax = companyIncomeTax + developmentLevy;
+    // Applies to all businesses regardless of exemption status
+    const flatTax = grossIncome * FLAT_TAX_RATE;
+
+    // ========================================
+    // STEP 8: Calculate Total Tax
+    // ========================================
+
+    let totalTax = companyIncomeTax + developmentLevy + flatTax;
 
     // ========================================
     // STEP 8: Apply Minimum Effective Tax Rate (if applicable)
@@ -374,6 +382,7 @@ export function calculateBusinessTax(
         companyIncomeTax,
         developmentLevy,
         minimumEffectiveTax,
+        flatTax,
         totalTax,
         isSmallCompanyExempt,
         isStartupExempt,

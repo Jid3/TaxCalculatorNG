@@ -117,6 +117,7 @@ export interface BusinessTaxBreakdown {
     companyIncomeTax: number; // CIT at 30% or 0% for small companies
     developmentLevy: number; // 4% levy or 0% for small companies
     minimumEffectiveTax: number; // 15% for very large companies
+    flatTax: number; // 1% flat tax on turnover
     totalTax: number;
 
     // Exemptions Applied
@@ -143,6 +144,7 @@ export interface CalculationHistoryItem extends Partial<TaxBreakdown> {
     businessType?: BusinessType;
     companyIncomeTax?: number;
     developmentLevy?: number;
+    flatTax?: number; 
     effectiveTaxRate?: number;
     employmentRelief?: number;
     compensationRelief?: number;

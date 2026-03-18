@@ -231,6 +231,7 @@ export default function CalculatorScreen() {
                     taxableIncome: businessTaxBreakdown.taxableIncome,
                     companyIncomeTax: businessTaxBreakdown.companyIncomeTax,
                     developmentLevy: businessTaxBreakdown.developmentLevy,
+                    flatTax: businessTaxBreakdown.flatTax,
                     totalTax: businessTaxBreakdown.totalTax,
                     netIncome: businessTaxBreakdown.netIncome,
                     effectiveTaxRate: businessTaxBreakdown.effectiveTaxRate,
@@ -1272,6 +1273,13 @@ export default function CalculatorScreen() {
                                     {businessTaxBreakdown.developmentLevy > 0
                                         ? `${formatCurrency(businessTaxBreakdown.taxableIncome)} × 4% = ${formatCurrency(businessTaxBreakdown.developmentLevy)}`
                                         : 'Exempt (0%)'}
+                                </Text>
+                            </View>
+
+                            <View style={styles.bracketCard}>
+                                <Text style={styles.bracketHeader}>Flat Tax (1%)</Text>
+                                <Text style={styles.bracketDetails}>
+                                    {formatCurrency(businessTaxBreakdown.grossIncome)} × 1% = {formatCurrency(businessTaxBreakdown.flatTax)}
                                 </Text>
                             </View>
 

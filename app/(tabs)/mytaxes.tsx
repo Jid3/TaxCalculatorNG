@@ -278,6 +278,14 @@ export default function MyTaxesScreen() {
                                         </Text>
                                     </View>
                                 )}
+                                {item.flatTax !== undefined && (
+                                    <View style={styles.breakdownRow}>
+                                        <Text style={[styles.breakdownText, { color: colors.text }]}>Flat Tax (1%)</Text>
+                                        <Text style={[styles.breakdownValue, { color: colors.danger }]}>
+                                            {formatCurrency(item.flatTax ?? 0)}
+                                        </Text>
+                                    </View>
+                                )}
                             </>
                         )}
 

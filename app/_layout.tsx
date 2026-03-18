@@ -12,6 +12,7 @@ import * as SystemUI from 'expo-system-ui';
 import { useEffect } from "react";
 import { Platform, StatusBar as RNStatusBar } from "react-native";
 import mobileAds from 'react-native-google-mobile-ads';
+import * as ScreenCapture from 'expo-screen-capture';
 
 function RootLayoutContent() {
   const { isLocked } = useSecurity();
@@ -22,6 +23,9 @@ function RootLayoutContent() {
       NavigationBar.setPositionAsync('absolute');
       NavigationBar.setBackgroundColorAsync('transparent');
     }
+    
+    // Prevent screen capture/recording for security
+    ScreenCapture.preventScreenCaptureAsync().catch(console.warn);
   }, []);
 
   useEffect(() => {
