@@ -298,7 +298,10 @@ export default function EducationScreen() {
 
             {/* Sticky Adaptive Banner Ad at Bottom */}
             <View style={styles.stickyAdContainer}>
-                <AdBanner size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} />
+                <AdBanner
+                    unitId="ca-app-pub-2599860932009835/4019315870"
+                    size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                />
             </View>
         </View>
     );

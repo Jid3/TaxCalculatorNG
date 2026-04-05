@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 
 /**
@@ -17,19 +17,21 @@ import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 
 interface AdBannerProps {
     size?: BannerAdSize;
+    unitId?: string;
 }
 
 // IMPORTANT: Replace with your actual Ad Unit ID for production
 // Using test Ad Unit ID for now - replace with real ID before publishing
 const AD_UNIT_IDS = {
-    android: 'ca-app-pub-3940256099942544/6300978111', // Test Banner ID
+    android: 'ca-app-pub-2599860932009835/8701688228', // Real Banner ID
 };
 
-export function AdBanner({ size = BannerAdSize.BANNER }: AdBannerProps) {
+export function AdBanner({ size = BannerAdSize.BANNER, unitId }: AdBannerProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
 
-    const adUnitId = Platform.select(AD_UNIT_IDS);
+    const defaultAdUnitId = Platform.select(AD_UNIT_IDS);
+    const adUnitId = unitId || defaultAdUnitId;
 
     // Don't show anything if no ad unit configured or if ad failed
     if (!adUnitId || hasError) {

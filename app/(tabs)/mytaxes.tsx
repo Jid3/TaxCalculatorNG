@@ -1,21 +1,17 @@
 import { AdBanner } from '@/components/AdBanner';
 import TaxModeToggle from '@/components/TaxModeToggle';
-import { useAuth } from '@/contexts/AuthContext';
 import { useTaxMode } from '@/contexts/TaxModeContext';
 import useTheme from '@/hooks/userTheme';
 import { useTaxHistory } from '@/hooks/useTaxHistory';
 import { CalculationHistoryItem } from '@/types/taxTypes';
 import { formatCurrency } from '@/utils/taxCalculations';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 export default function MyTaxesScreen() {
     const { colors } = useTheme();
-    const { user } = useAuth();
-    const router = useRouter();
     const { taxMode } = useTaxMode();
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -38,7 +34,7 @@ export default function MyTaxesScreen() {
                     onPress: async () => {
                         try {
                             await deleteCalculation(id);
-                        } catch (error) {
+                        } catch {
                             Alert.alert("Error", "Failed to delete calculation");
                         }
                     }

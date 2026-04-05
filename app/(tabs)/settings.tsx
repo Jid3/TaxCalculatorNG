@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, Alert, Modal, TextInput, TouchableOpacity, Linking, } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, Alert, Modal, TextInput, TouchableOpacity, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import useTheme from '@/hooks/userTheme';
@@ -10,7 +10,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function SettingsScreen() {
   const { colors, isDarkMode, toggleDarkMode } = useTheme();
-  const { user } = useAuth();
   const {
     hasPassword,
     isBiometricEnabled,
@@ -37,9 +36,6 @@ export default function SettingsScreen() {
     hasPermission, 
     requestPermission 
   } = useNotifications();
-
-  // For guest mode, displayUser is just the local user
-  const displayUser = user || { name: 'Guest User', email: 'guest@example.com', imageUrl: null, userId: 'guest' };
 
   const handleLockToggle = async (value: boolean) => {
     if (value) {
@@ -76,7 +72,7 @@ export default function SettingsScreen() {
       setNewPIN('');
       setConfirmPIN('');
       Alert.alert('Success', 'Security settings updated');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to save PIN');
     }
   };
@@ -85,7 +81,7 @@ export default function SettingsScreen() {
     try {
       await setLockTimeout(timeout);
       setIsTimeoutModalVisible(false);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to update timeout setting');
     }
   };
@@ -443,6 +439,50 @@ export default function SettingsScreen() {
               <View style={styles.settingContent}>
                 <Text style={[styles.settingTitle, { color: colors.primary }]}>Add Reminder Time</Text>
               </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Contact Us Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Contact</Text>
+          <View style={styles.settingCard}>
+            <TouchableOpacity
+              style={[styles.settingItem, styles.settingItemLast]}
+              onPress={() => Linking.openURL('mailto:taxcalculatorng@gmail.com')}
+            >
+              <View style={styles.settingIcon}>
+                <Ionicons name="mail-outline" size={20} color={colors.primary} />
+              </View>
+              <View style={styles.settingContent}>
+                <Text style={styles.settingTitle}>Contact Us</Text>
+                <Text style={styles.settingDescription}>
+                  taxcalculatorng@gmail.com
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Privacy Policy Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Legal</Text>
+          <View style={styles.settingCard}>
+            <TouchableOpacity
+              style={[styles.settingItem, styles.settingItemLast]}
+              onPress={() => router.push('/privacy-policy' as any)}
+            >
+              <View style={styles.settingIcon}>
+                <Ionicons name="document-text-outline" size={20} color={colors.primary} />
+              </View>
+              <View style={styles.settingContent}>
+                <Text style={styles.settingTitle}>Privacy Policy</Text>
+                <Text style={styles.settingDescription}>
+                  Read our privacy policy
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>

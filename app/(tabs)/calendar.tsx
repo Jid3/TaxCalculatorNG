@@ -5,7 +5,8 @@ import {
     formatCurrency,
     formatNumber,
 } from '@/utils/taxCalculations';
-import { Ionicons } from '@expo/vector-icons';
+
+import { AdBanner } from '@/components/AdBanner';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
@@ -20,6 +21,7 @@ import {
     View,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CALENDAR_DATA_KEY = '@tax_calendar_data';
@@ -173,26 +175,20 @@ export default function CalendarScreen() {
             backgroundColor: colors.bg,
         },
         header: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: 20,
-            paddingTop: Platform.OS === 'android' ? 40 : 20,
             backgroundColor: colors.surface,
+            padding: 10,
             borderBottomWidth: 1,
             borderBottomColor: colors.border,
         },
-        titleContainer: {
-            marginLeft: 15,
-        },
-        title: {
+        headerTitle: {
             fontSize: 24,
             fontWeight: 'bold',
             color: colors.text,
+            marginBottom: 4,
         },
-        subtitle: {
-            fontSize: 14,
+        headerSubtitle: {
+            fontSize: 13,
             color: colors.textMuted,
-            marginTop: 2,
         },
         scrollContent: {
             paddingBottom: 20,
@@ -370,16 +366,24 @@ export default function CalendarScreen() {
             color: '#fff',
             fontWeight: 'bold',
         },
+        stickyAdContainer: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: colors.bg,
+            paddingVertical: 4,
+            alignItems: 'center',
+            borderTopWidth: 1,
+            borderTopColor: colors.border,
+        },
     });
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
-                <Ionicons name="calendar" size={32} color={colors.primary} />
-                <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Calendar</Text>
-                    <Text style={styles.subtitle}>Track daily income & expenses</Text>
-                </View>
+                <Text style={styles.headerTitle}>Calendar</Text>
+                <Text style={styles.headerSubtitle}>Track daily income & expenses</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -516,6 +520,14 @@ export default function CalendarScreen() {
                 </KeyboardAvoidingView>
             </Modal>
 
+
+
+            <View style={styles.stickyAdContainer}>
+                <AdBanner
+                    unitId="ca-app-pub-2599860932009835/7078490410"
+                    size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                />
+            </View>
         </SafeAreaView>
     );
 }

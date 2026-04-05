@@ -1,4 +1,3 @@
-import { AdBanner } from '@/components/AdBanner';
 import BusinessCalculatorForm from '@/components/BusinessCalculatorForm';
 import TaxModeToggle from '@/components/TaxModeToggle';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +11,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useGlobalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 export default function CalculatorScreen() {
     const { colors } = useTheme();
@@ -92,6 +90,24 @@ export default function CalculatorScreen() {
     // URL Params for Edit Mode
     const { editMode: paramEditMode, calculationId, ...params } = useGlobalSearchParams();
 
+    const handleReset = () => {
+        setIncome('');
+        setPension('');
+        setNhf('');
+        setNhis('');
+        setLifeInsurance('');
+        setRentPaid('');
+        setEmploymentRelief('');
+        setCompensationRelief('');
+        setCustomDeductions([]);
+        setTaxBreakdown(null);
+        setBusinessTaxBreakdown(null);
+        setShowResults(false);
+        setEditMode(false);
+        setEditingId(null);
+        router.setParams({ editMode: '', calculationId: '', reset: '' }); // Clear params
+    };
+
     useEffect(() => {
         // If reset is passed, clear form
         if (params.reset === 'true') {
@@ -118,7 +134,7 @@ export default function CalculatorScreen() {
             // We should probably auto-calculate immediately to show results if we have data
             // But for now let the user tap calculate to verify
         }
-    }, [paramEditMode, calculationId, params.reset, params.incomeType]);
+    }, [paramEditMode, calculationId, params.reset, params.incomeType, params.income, params.pension, params.nhf, params.nhis, params.lifeInsurance, params.rentPaid, handleReset]);
 
 
     const handleCalculate = () => {
@@ -244,24 +260,6 @@ export default function CalculatorScreen() {
         } catch (error: any) {
             Alert.alert('Error', error.message || 'Failed to save calculation');
         }
-    };
-
-    const handleReset = () => {
-        setIncome('');
-        setPension('');
-        setNhf('');
-        setNhis('');
-        setLifeInsurance('');
-        setRentPaid('');
-        setEmploymentRelief('');
-        setCompensationRelief('');
-        setCustomDeductions([]);
-        setTaxBreakdown(null);
-        setBusinessTaxBreakdown(null);
-        setShowResults(false);
-        setEditMode(false);
-        setEditingId(null);
-        router.setParams({ editMode: '', calculationId: '', reset: '' }); // Clear params
     };
 
     // Custom deduction helpers
@@ -1312,11 +1310,6 @@ export default function CalculatorScreen() {
                     <View style={{ height: 70 }} />
                 </ScrollView>
             </KeyboardAvoidingView>
-
-            {/* Sticky Adaptive Banner Ad at Bottom */}
-            <View style={styles.stickyAdContainer}>
-                <AdBanner size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER} />
-            </View>
         </View>
     );
 }

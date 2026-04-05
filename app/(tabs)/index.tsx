@@ -1,6 +1,5 @@
 import { AdBanner } from '@/components/AdBanner';
 import TaxModeToggle from '@/components/TaxModeToggle';
-import { useAuth } from '@/contexts/AuthContext';
 import { useTaxMode } from '@/contexts/TaxModeContext';
 import useTheme from '@/hooks/userTheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +10,6 @@ import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
-  const { user } = useAuth();
   const router = useRouter();
   const { taxMode } = useTaxMode();
 

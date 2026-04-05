@@ -5,6 +5,7 @@ import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
 import { TaxHistoryProvider } from "@/contexts/TaxHistoryContext";
 import { TaxModeProvider } from "@/contexts/TaxModeContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import LockScreen from "@/components/LockScreen";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from 'expo-navigation-bar';
@@ -12,21 +13,11 @@ import * as SystemUI from 'expo-system-ui';
 import { useEffect } from "react";
 import { Platform, StatusBar as RNStatusBar } from "react-native";
 import mobileAds from 'react-native-google-mobile-ads';
-import * as ScreenCapture from 'expo-screen-capture';
+
 
 function RootLayoutContent() {
   const { isLocked } = useSecurity();
   const { isDarkMode } = useTheme();
-
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      NavigationBar.setPositionAsync('absolute');
-      NavigationBar.setBackgroundColorAsync('transparent');
-    }
-    
-    // Prevent screen capture/recording for security
-    ScreenCapture.preventScreenCaptureAsync().catch(console.warn);
-  }, []);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -64,6 +55,8 @@ function RootLayoutContent() {
       />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ title: "Home" }} />
+        <Stack.Screen name="onboarding" options={{ title: "Onboarding", gestureEnabled: false }} />
+        <Stack.Screen name="privacy-policy" options={{ title: "Privacy Policy" }} />
       </Stack>
     </>
   );
@@ -84,17 +77,19 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <SecurityProvider>
-        <AuthProvider>
-          <NotificationProvider>
-            <TaxHistoryProvider>
-              <TaxModeProvider>
-                <RootLayoutContent />
-              </TaxModeProvider>
-            </TaxHistoryProvider>
-          </NotificationProvider>
-        </AuthProvider>
-      </SecurityProvider>
+      <OnboardingProvider>
+        <SecurityProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <TaxHistoryProvider>
+                <TaxModeProvider>
+                  <RootLayoutContent />
+                </TaxModeProvider>
+              </TaxHistoryProvider>
+            </NotificationProvider>
+          </AuthProvider>
+        </SecurityProvider>
+      </OnboardingProvider>
     </ThemeProvider>
   );
 }

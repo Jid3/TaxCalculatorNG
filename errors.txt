@@ -1,0 +1,17 @@
+﻿
+C:\Users\Jide\Documents\Project Tax 2.0\Taxcalculator\app\onboarding.tsx
+   864:32  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  1065:62  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  1209:32  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  1463:58  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Jide\Documents\Project Tax 2.0\Taxcalculator\app\privacy-policy.tsx
+  242:45  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  394:21  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  394:34  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\Jide\Documents\Project Tax 2.0\Taxcalculator\revert_gradient.js
+  9:72  error  Parsing error: Unexpected character '1'
+
+Γ£û 8 problems (8 errors, 0 warnings)
+
